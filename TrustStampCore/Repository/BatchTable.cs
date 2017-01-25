@@ -20,10 +20,10 @@ namespace TrustStampCore.Repository
         public void CreateIfNotExist()
         {
             string sql = "create table if not exists Batch "+
-                "(id INT PRIMARY KEY NOT NULL,"+
-                "root NVARCHAR(256),"+
-                "state TINYINT,"+
-                "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
+                "(id integer primary key," +
+                "root nvarchar(256),"+
+                "state tinyint,"+
+                "timestamp datetime default current_timestamp)";
             SQLiteCommand command = new SQLiteCommand(sql, Connection);
             command.ExecuteNonQuery();
         }
@@ -40,11 +40,19 @@ namespace TrustStampCore.Repository
                     new JProperty("id", reader["id"]),
                     new JProperty("root", reader["root"]),
                     new JProperty("state", reader["state"]),
-                    new JProperty("timesamp", reader["timestamp"])
+                    new JProperty("timestamp", reader["timestamp"])
                     ));
             }
 
             return array;
+        }
+
+        public void Add(JObject batch)
+        {
+            SQLiteCommand insertSQL = new SQLiteCommand("insert into Batch (root, state) values (@root,@state)", Connection);
+            insertSQL.Parameters.Add(new SQLiteParameter("@root", batch["root"]));
+            insertSQL.Parameters.Add(new SQLiteParameter("@state", batch["state"]));
+            insertSQL.ExecuteNonQuery();
         }
     }
 }
