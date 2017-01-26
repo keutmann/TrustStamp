@@ -8,25 +8,26 @@ using System.Threading.Tasks;
 
 namespace TrustStampCore.Repository
 {
-    public class BatchTable : DBTable
+    public class ProofTable : DBTable
     {
 
-        public BatchTable(SQLiteConnection connection, string tableName = "Batch")
+
+        public ProofTable(SQLiteConnection connection, string tableName = "Proof")
         {
             Connection = connection;
             TableName = tableName;
         }
 
-        public static BatchTable Get(SQLiteConnection connection)
+        public static ProofTable Get(SQLiteConnection connection)
         {
-            var table = new BatchTable(connection);
+            var table = new ProofTable(connection);
             table.CreateIfNotExist();
             return table;
         }
 
         public void CreateIfNotExist()
         {
-            string sql = "create table if not exists Batch "+
+            string sql = "create table if not exists Proof "+
                 "(id integer primary key," +
                 "root nvarchar(256),"+
                 "state tinyint,"+
@@ -38,7 +39,7 @@ namespace TrustStampCore.Repository
         public JArray GetUnprocessed()
         {
             JArray array = new JArray();
-            var sql = "select * from Batch where state = 1 order by Timestamp";
+            var sql = "select * from Proof where state = 1 order by Timestamp";
             var command = new SQLiteCommand(sql, Connection);
             SQLiteDataReader reader = command.ExecuteReader();
             while (reader.Read())
@@ -56,11 +57,10 @@ namespace TrustStampCore.Repository
 
         public void Add(JObject batch)
         {
-            SQLiteCommand insertSQL = new SQLiteCommand("insert into Batch (root, state) values (@root,@state)", Connection);
+            SQLiteCommand insertSQL = new SQLiteCommand("insert into Proof (root, state) values (@root,@state)", Connection);
             insertSQL.Parameters.Add(new SQLiteParameter("@root", batch["root"]));
             insertSQL.Parameters.Add(new SQLiteParameter("@state", batch["state"]));
             insertSQL.ExecuteNonQuery();
         }
     }
 }
-

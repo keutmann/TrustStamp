@@ -10,6 +10,8 @@ namespace TrustStampCore.Repository
 {
     public class TimeStampDatabase : IDisposable
     {
+        public static string DatabaseFilename = "test.db";
+
         public string Name { get; set; }
         public SQLiteConnection Connection { get; set; }
 
@@ -25,7 +27,7 @@ namespace TrustStampCore.Repository
                 SQLiteConnection.CreateFile(Name);
         }
 
-        public void Open()
+        public void OpenConnection()
         {
             var sb = new SQLiteConnectionStringBuilder();
             sb.DataSource = Name;
@@ -48,6 +50,13 @@ namespace TrustStampCore.Repository
         public void Dispose()
         {
             Connection.Dispose();
+        }
+
+        public static TimeStampDatabase Open()
+        {
+            var db = new TimeStampDatabase(DatabaseFilename);
+            db.OpenConnection();
+            return db;
         }
     }
 }
