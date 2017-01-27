@@ -8,15 +8,18 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Configuration;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Topshelf;
 using TrustStampCore.Extensions;
-//using TrustStampCore.Repository;
-//using TrustStampCore.Service;
+using System.Collections.Specialized;
+using System.Net;
 
 namespace TrustStampServer
 {
+
     public class Program
     {
         public static string dbfileName = "test.db";
@@ -24,69 +27,109 @@ namespace TrustStampServer
         public static int Main(string[] args)
         {
             Debug.Listeners.Add(new TextWriterTraceListener(Console.Out));
-            var test = Hex.ToBytes("AA"); // Just to make Api Controll able to find the BatchController in library assembly
+            var test = Hex.ToBytes("AA"); // Just to make Api Controller able to find the BatchController in library assembly
 
-            return (int)HostFactory.Run(x =>
+            var settings = new Settings(ConfigurationManager.AppSettings);
+
+            return (int)HostFactory.Run(configurator =>
             {
-                x.Service<OwinService>(s =>
+                configurator.AddCommandLineDefinition("port", f => { settings.NameValue["port"] = f; });
+                configurator.ApplyCommandLine();
+
+                configurator.Service<TrustStampService>(s =>
                 {
-                    s.ConstructUsing(() => new OwinService());
-                    s.WhenStarted(service => service.Start());
+                    s.ConstructUsing(() => new TrustStampService());
+                    s.WhenStarted(service => service.Start(settings));
+                    s.WhenPaused(service => service.Pause());
+                    s.WhenContinued(service => service.Continue());
                     s.WhenStopped(service => service.Stop());
                 });
             });
+
         }
-
-
-
-        //static void Main(string[] args)
-        //{
-        //    StarService();
-        //    Console.WriteLine("Add data to db via http!");
-        //    Console.WriteLine("Press c for stop!");
-        //    ConsoleKeyInfo key = new ConsoleKeyInfo();
-        //    while (key.KeyChar != 'c')
-        //    {
-        //        Task.Factory.StartNew(() => key = Console.ReadKey()).Wait(TimeSpan.FromMinutes(60.0));
-        //    }
-
-        //    using (var db = new TimeStampDatabase(dbfileName))
-        //    {
-        //        db.Open();
-        //        var batch = new BatchTable(db.Connection);
-        //        batch.CreateIfNotExist();
-
-        //        var unprocessed = batch.GetUnprocessed();
-
-        //        Console.WriteLine(unprocessed.ToString());
-        //    }
-        //    Console.WriteLine("Done!");
-        //    Console.ReadKey();
-
-        //}
-
-        //public static void StarService()
-        //{
-        //    System.Net.IPEndPoint listenpoint = new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 10000);
-        //    Console.WriteLine("Listening at: {0}", listenpoint);
-        //    var listener = new HttpService(listenpoint);
-
-        //    var batchService = new BatchService(dbfileName);
-
-        //    listener.RequestReceived += new EventHandler<RequestParameters>(batchService.RequestReceived);
-
-        //    listener.Start();
-
-        //}
     }
 
-    public class OwinService
+    public class Settings 
+    {
+        public int Port {
+            get
+            {
+                int result;
+                if (int.TryParse(NameValue["port"], out result))
+                    return result;
+                return 9000;
+            }
+            set
+            {
+                NameValue["port"] = value.ToString();
+            }
+        }
+
+        public IPEndPoint EndPoint;
+
+        public NameValueCollection NameValue;
+
+        public Settings(NameValueCollection settings)
+        {
+            NameValue = settings;
+            EndPoint = new IPEndPoint(IPAddress.Loopback, 9000);
+        }
+    }
+
+    public class TrustStampService
     {
         private IDisposable _webApp;
+        private bool process = true;
+        private Timer timer;
+        private int timeInMs = 1000;
 
-        public void Start()
+        public void Start(Settings settings)
         {
-            _webApp = WebApp.Start<StartOwin>("http://localhost:9000");
+            var url = settings.EndPoint.ToString();
+            _webApp = WebApp.Start<StartOwin>(url);
+            RunTimer(ProcessTimeStamps);
+        }
+
+        private void RunTimer(Action method)
+        {
+
+
+            timer = new Timer((o) =>
+            {
+                try
+                {
+                    method();
+                }
+                catch (Exception)
+                {
+                    // handle
+                }
+                finally
+                {
+                    // only set the initial time, do not set the recurring time
+                    timer.Change(timeInMs, Timeout.Infinite);
+                }
+            });
+
+            // only set the initial time, do not set the recurring time
+            timer.Change(timeInMs, Timeout.Infinite);
+        }
+
+        public void ProcessTimeStamps()
+        {
+            Console.WriteLine("Processing: " + DateTime.Now.ToLocalTime());
+            Thread.Sleep(2000);
+            Console.WriteLine("Done working!");
+        }
+
+        public void Pause()
+        {
+            process = false;
+        }
+
+        public void Continue()
+        {
+            process = true;
         }
 
         public void Stop()

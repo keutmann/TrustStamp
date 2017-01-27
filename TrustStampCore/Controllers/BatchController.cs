@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using TrustStampCore.Repository;
 
-namespace TrustStampCore.Controller
+namespace TrustStampCore.Controllers
 {
 
-    public class ProofController : ApiController
+    public class BatchController : ApiController
     {
+        private static string dbfileName = "test.db";
 
         [HttpGet]
         [Route("Get")]
@@ -19,11 +20,11 @@ namespace TrustStampCore.Controller
         {
             using (var db = TimeStampDatabase.Open())
             {
-                var proof = ProofTable.Get(db.Connection);
+                var batch = BatchTable.Get(db.Connection);
 
-                //var unprocessed = batch.GetUnprocessed();
+                var unprocessed = batch.GetUnprocessed();
 
-                return Ok();
+                return Ok(unprocessed);
             }
 
         }

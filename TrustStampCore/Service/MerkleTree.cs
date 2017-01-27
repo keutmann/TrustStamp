@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using TrustStampCore.Model;
+using TrustStampCore.Models;
 using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Service

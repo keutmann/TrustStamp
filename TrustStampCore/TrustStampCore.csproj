@@ -66,6 +66,7 @@
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
       <Private>True</Private>
@@ -83,16 +84,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\Hex.cs" />
-    <Compile Include="Model\TreeEntity.cs" />
+    <Compile Include="Models\TreeEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\ProofTable.cs" />
     <Compile Include="Repository\BatchTable.cs" />
     <Compile Include="Repository\DBTable.cs" />
     <Compile Include="Repository\TimeStampDatabase.cs" />
+    <Compile Include="Service\Batch.cs" />
     <Compile Include="Service\BitcoinManager.cs" />
     <Compile Include="Service\MerkleTree.cs" />
-    <Compile Include="Controller\ProofController.cs" />
-    <Compile Include="Controller\BatchController.cs" />
+    <Compile Include="Controllers\ProofController.cs" />
+    <Compile Include="Controllers\BatchController.cs" />
+    <Compile Include="Service\Proof.cs" />
     <Compile Include="Service\TimeMe.cs" />
   </ItemGroup>
   <ItemGroup />

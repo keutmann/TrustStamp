@@ -29,38 +29,43 @@ namespace TrustStampCore.Repository
         {
             string sql = "create table if not exists Proof "+
                 "(id integer primary key," +
-                "root nvarchar(256),"+
-                "state tinyint,"+
-                "timestamp datetime default current_timestamp)";
+                "hash text,"+
+                "path text," +
+                "timestamp datetime)";
             SQLiteCommand command = new SQLiteCommand(sql, Connection);
             command.ExecuteNonQuery();
         }
 
-        public JArray GetUnprocessed()
-        {
-            JArray array = new JArray();
-            var sql = "select * from Proof where state = 1 order by Timestamp";
-            var command = new SQLiteCommand(sql, Connection);
-            SQLiteDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                array.Add(new JObject(
-                    new JProperty("id", reader["id"]),
-                    new JProperty("root", reader["root"]),
-                    new JProperty("state", reader["state"]),
-                    new JProperty("timestamp", reader["timestamp"])
-                    ));
-            }
-
-            return array;
-        }
 
         public void Add(JObject batch)
         {
-            SQLiteCommand insertSQL = new SQLiteCommand("insert into Proof (root, state) values (@root,@state)", Connection);
-            insertSQL.Parameters.Add(new SQLiteParameter("@root", batch["root"]));
-            insertSQL.Parameters.Add(new SQLiteParameter("@state", batch["state"]));
+            SQLiteCommand insertSQL = new SQLiteCommand("insert into Proof (hash, path, timestamp) values (@hash,@path,@timestamp)", Connection);
+            insertSQL.Parameters.Add(new SQLiteParameter("@hash", batch["hash"]));
+            insertSQL.Parameters.Add(new SQLiteParameter("@path", batch["path"]));
+            insertSQL.Parameters.Add(new SQLiteParameter("@timestamp", batch["timestamp"]));
             insertSQL.ExecuteNonQuery();
         }
+
+        public JObject GetByHash(string hash)
+        {
+            JObject result = null;
+            SQLiteCommand command = new SQLiteCommand("select * from Proof where hash = @hash", Connection);
+            command.Parameters.Add(new SQLiteParameter("@hash", hash));
+            SQLiteDataReader reader = command.ExecuteReader();
+            if(reader.Read())
+                result = NewItem(reader["hash"], reader["path"], reader["timestamp"]);
+
+            return result;
+        }
+
+        public JObject NewItem(object hash, object path = null, object timestamp = null)
+        {
+            return new JObject(
+                new JProperty("hash", hash),
+                new JProperty("path", path),
+                new JProperty("timestamp", timestamp)
+                );
+        }
+
     }
 }
