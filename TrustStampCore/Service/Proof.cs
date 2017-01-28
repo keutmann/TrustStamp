@@ -14,17 +14,17 @@ namespace TrustStampCore.Service
     {
         public JObject Add(string id)
         {
-            var base64id = VerifyAndGetBase64(id);
+            var cleanId = VerifyAndGetBase64(id);
 
             using (var db = TimeStampDatabase.Open())
             {
                 var table = ProofTable.Get(db.Connection);
 
-                var item = table.GetByHash(base64id);
+                var item = table.GetByHash(cleanId);
                 if (item != null)
                     return item;
 
-                item = table.NewItem(id, null, Batch.TimeStampSlice());
+                item = table.NewItem(cleanId, null, Batch.TimeStampSlice());
                 table.Add(item);
 
                 return item;
@@ -53,16 +53,17 @@ namespace TrustStampCore.Service
             if (string.IsNullOrEmpty(id))
                 throw new ApplicationException("Value cannot be empty");
 
-            if (id.Length == 64)
-                hash = Hex.ToBytes(id);
-            else
-                hash = HttpServerUtility.UrlTokenDecode(id);
+            id = id.ToUpper(); // Ensure that the same hash value
+            if (id.Length != 64)
+                throw new ApplicationException("Value is not 64 charators long");
 
+            hash = Hex.ToBytes(id);
+            
             if (hash.Length != 32)
                 throw new ApplicationException("Invalid SHA256 hash format, byte length is " + hash.Length);
 
-            var base64id = HttpServerUtility.UrlTokenEncode(hash);
-            return base64id;
+            //var base64id = HttpServerUtility.UrlTokenEncode(hash);
+            return id;
         }
 
     }

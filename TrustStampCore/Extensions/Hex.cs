@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace TrustStampCore.Extensions
 {
@@ -27,7 +29,7 @@ namespace TrustStampCore.Extensions
             return arr;
         }
 
-        public static string ToHex(byte[] data)
+        public static string ToHex(this byte[] data)
         {
             return BitConverter.ToString(data).Replace("-", "");
         }
@@ -42,6 +44,14 @@ namespace TrustStampCore.Extensions
             //Or the two combined, but a bit slower:
             //return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
         }
+
+        public static string RandomSHA256Hex()
+        {
+            var crypt = SHA256.Create();
+            var hash = crypt.ComputeHash(Encoding.Unicode.GetBytes(Guid.NewGuid().ToString()));
+            return hash.ToHex();
+        }
+
     }
 
 }
