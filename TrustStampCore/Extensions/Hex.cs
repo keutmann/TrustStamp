@@ -45,12 +45,7 @@ namespace TrustStampCore.Extensions
             //return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
         }
 
-        public static string RandomSHA256Hex()
-        {
-            var crypt = SHA256.Create();
-            var hash = crypt.ComputeHash(Encoding.Unicode.GetBytes(Guid.NewGuid().ToString()));
-            return hash.ToHex();
-        }
+
 
     }
 

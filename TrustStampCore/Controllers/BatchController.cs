@@ -12,8 +12,6 @@ namespace TrustStampCore.Controllers
 
     public class BatchController : ApiController
     {
-        private static string dbfileName = "test.db";
-
         [HttpGet]
         [Route("Get")]
         public IHttpActionResult Get()

@@ -11,17 +11,21 @@ namespace TrustStampCore.Repository
     public class TimeStampDatabase : IDisposable
     {
         public static string DatabaseFilename = "test.db";
-        
-        public string Name { get; set; }
-        public SQLiteConnection Connection { get; set; }
 
-        public static bool IsMemoryDB
+        public static string MemoryConnectionString = "Data Source=:memory:;Version=3;";
+        public static TimeStampDatabase MemoryDatabase;
+
+        public SQLiteConnection Connection;
+
+        public string Name { get; set; }
+
+        public static bool IsMemoryDatabase {get;set;}
+
+        public TimeStampDatabase()
         {
-            get
-            {
-                return DatabaseFilename.IndexOf(":memory:", StringComparison.OrdinalIgnoreCase) >= 0;
-            }
+            IsMemoryDatabase = true;
         }
+
 
         public TimeStampDatabase(string name)
         {
@@ -31,46 +35,60 @@ namespace TrustStampCore.Repository
 
         public void CreateIfNotExist()
         {
-            if (!IsMemoryDB && !File.Exists(Name))
+            if (!IsMemoryDatabase && !File.Exists(Name))
                 SQLiteConnection.CreateFile(Name);
         }
 
-        public void OpenConnection()
+        public SQLiteConnection OpenConnection()
         {
-            var sb = new SQLiteConnectionStringBuilder();
-            if (IsMemoryDB)
-                sb.ConnectionString = DatabaseFilename;
-            else
+            if(IsMemoryDatabase)
             {
-
-                sb.DataSource = Name;
-                sb.Flags = SQLiteConnectionFlags.UseConnectionPool;
-                //tt.JournalMode = SQLiteJournalModeEnum.Default;
-                //tt.NoSharedFlags = false;
-                sb.Pooling = true;
-                sb.ReadOnly = false;
-                sb.Add("cache", "shared");
-                //tt.Add("Compress", "True");
-                //tt.SyncMode = SynchronizationModes.Normal;
-                //tt.DefaultIsolationLevel = System.Data.IsolationLevel.ReadUncommitted;
-                //tt.DefaultDbType = System.Data.DbType.
-                //var dd = new SQLiteConnection(;
+                Connection = new SQLiteConnection(MemoryConnectionString);
+                Connection.Open();
+                return Connection;
             }
+
+            var sb = new SQLiteConnectionStringBuilder();
+            
+            sb.DataSource = Name;
+            sb.Flags = SQLiteConnectionFlags.UseConnectionPool;
+            //tt.JournalMode = SQLiteJournalModeEnum.Default;
+            //tt.NoSharedFlags = false;
+            sb.Pooling = true;
+            sb.ReadOnly = false;
+            sb.Add("cache", "shared");
+            //tt.Add("Compress", "True");
+            //tt.SyncMode = SynchronizationModes.Normal;
+            //tt.DefaultIsolationLevel = System.Data.IsolationLevel.ReadUncommitted;
+            //tt.DefaultDbType = System.Data.DbType.
+            //var dd = new SQLiteConnection(;
 
             Connection = new SQLiteConnection(sb.ConnectionString);
             Connection.Open();
-        }
-
-        public void Dispose()
-        {
-            Connection.Dispose();
+            return Connection;
         }
 
         public static TimeStampDatabase Open()
         {
-            var db = new TimeStampDatabase(DatabaseFilename);
-            db.OpenConnection();
-            return db;
+            if (IsMemoryDatabase)
+            {
+                if (MemoryDatabase == null) { 
+                    MemoryDatabase = new TimeStampDatabase();
+                    MemoryDatabase.OpenConnection();
+                }
+                return MemoryDatabase;
+            }
+            else
+            {
+                var db = new TimeStampDatabase(DatabaseFilename);
+                return db;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (!IsMemoryDatabase)
+                Connection.Dispose();
         }
     }
 }

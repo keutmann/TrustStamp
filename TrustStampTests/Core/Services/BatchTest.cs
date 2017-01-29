@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TrustStampCore.Service;
 
-namespace TrustStampTests.Services
+namespace TrustStampTests.Core.Services
 {
     [TestFixture]
     public class BatchTest : StampTest

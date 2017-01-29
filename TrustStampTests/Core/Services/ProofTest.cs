@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using TrustStampCore.Service;
 using TrustStampCore.Extensions;
 
-namespace TrustStampTests.Services
+namespace TrustStampTests.Core.Services
 {
     [TestFixture]
     public class ProofTest : StampTest
@@ -27,7 +27,7 @@ namespace TrustStampTests.Services
         [Test]
         public void TestAdd()
         {
-            var id = Hex.RandomSHA256Hex().ToLower();
+            var id = ID.RandomSHA256Hex().ToLower(); // ToLower for making it a "not" safe id
             var p = new Proof();
             var item = p.Add(id);
 

@@ -14,17 +14,18 @@ namespace TrustStampCore.Service
     {
         public JObject Add(string id)
         {
-            var cleanId = VerifyAndGetBase64(id);
+            var idContainer = new ID(id);
 
             using (var db = TimeStampDatabase.Open())
             {
                 var table = ProofTable.Get(db.Connection);
+                var safeId = idContainer.GetSafeSHA256ID();
 
-                var item = table.GetByHash(cleanId);
+                var item = table.GetByHash(safeId);
                 if (item != null)
                     return item;
 
-                item = table.NewItem(cleanId, null, Batch.TimeStampSlice());
+                item = table.NewItem(safeId, null, Batch.TimeStampSlice());
                 table.Add(item);
 
                 return item;
@@ -33,13 +34,13 @@ namespace TrustStampCore.Service
 
         public JObject Get(string id)
         {
-            var base64id = VerifyAndGetBase64(id);
-
+            var idContainer = new ID(id);
+            
             using (var db = TimeStampDatabase.Open())
             {
                 var table = ProofTable.Get(db.Connection);
 
-                var item = table.GetByHash(base64id);
+                var item = table.GetByHash(idContainer.GetSafeSHA256ID());
                 if (item != null)
                     return item;
 
@@ -47,24 +48,7 @@ namespace TrustStampCore.Service
             }
         }
 
-        public string VerifyAndGetBase64(string id)
-        {
-            byte[] hash;
-            if (string.IsNullOrEmpty(id))
-                throw new ApplicationException("Value cannot be empty");
 
-            id = id.ToUpper(); // Ensure that the same hash value
-            if (id.Length != 64)
-                throw new ApplicationException("Value is not 64 charators long");
-
-            hash = Hex.ToBytes(id);
-            
-            if (hash.Length != 32)
-                throw new ApplicationException("Invalid SHA256 hash format, byte length is " + hash.Length);
-
-            //var base64id = HttpServerUtility.UrlTokenEncode(hash);
-            return id;
-        }
 
     }
 }

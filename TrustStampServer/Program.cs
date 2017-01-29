@@ -27,7 +27,6 @@ namespace TrustStampServer
         public static int Main(string[] args)
         {
             Debug.Listeners.Add(new TextWriterTraceListener(Console.Out));
-            var test = Hex.ToBytes("AA"); // Just to make Api Controller able to find the BatchController in library assembly
 
             var settings = new Settings(ConfigurationManager.AppSettings);
 
@@ -82,10 +81,14 @@ namespace TrustStampServer
         private bool process = true;
         private Timer timer;
         private int timeInMs = 1000;
+        public Settings Config { get; set; }
 
         public void Start(Settings settings)
         {
-            var url = settings.EndPoint.ToString();
+            var test = Hex.ToBytes("AA"); // Just to make Api Controller able to find the BatchController in library assembly
+
+            Config = settings;
+            var url = "http://"+settings.EndPoint.ToString();
             _webApp = WebApp.Start<StartOwin>(url);
             RunTimer(ProcessTimeStamps);
         }

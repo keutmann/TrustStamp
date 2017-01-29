@@ -14,6 +14,8 @@ namespace TrustStampCore.Controllers
 
     public class ProofController : ApiController
     {
+        public const string Path = "/api/proof/";
+
         [HttpPost]
         public IHttpActionResult Add([FromUri]string id)
         {
@@ -33,7 +35,7 @@ namespace TrustStampCore.Controllers
 
         // GET api/
         [HttpGet]
-        public IHttpActionResult Get(string id)
+        public IHttpActionResult Get([FromUri]string id)
         {
             try
             {
@@ -41,7 +43,7 @@ namespace TrustStampCore.Controllers
                 var result = proof.Get(id);
 
                 if (result == null)
-                    return NotFound();
+                    return Ok("ID Not found!");
 
                 return Ok(result);
             }

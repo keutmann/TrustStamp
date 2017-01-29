@@ -92,6 +92,7 @@
     <Compile Include="Repository\TimeStampDatabase.cs" />
     <Compile Include="Service\Batch.cs" />
     <Compile Include="Service\BitcoinManager.cs" />
+    <Compile Include="Service\ID.cs" />
     <Compile Include="Service\MerkleTree.cs" />
     <Compile Include="Controllers\ProofController.cs" />
     <Compile Include="Controllers\BatchController.cs" />
