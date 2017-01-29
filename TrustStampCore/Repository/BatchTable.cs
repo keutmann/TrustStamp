@@ -26,10 +26,13 @@ namespace TrustStampCore.Repository
 
         public void CreateIfNotExist()
         {
+            if (TableExist())
+                return;
+
             string sql = "create table if not exists Batch "+
                 "(id integer primary key," +
                 "root nvarchar(256),"+
-                "state tinyint,"+
+                "state text,"+
                 "timestamp datetime default current_timestamp)";
             SQLiteCommand command = new SQLiteCommand(sql, Connection);
             command.ExecuteNonQuery();

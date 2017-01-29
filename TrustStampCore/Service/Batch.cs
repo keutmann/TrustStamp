@@ -21,9 +21,17 @@ namespace TrustStampCore.Service
         //    }
         //}
 
-        public static string TimeStampSlice()
+
+        public static Func<string> PartitionMedthod = DefaultPartition;
+
+        public static string DefaultPartition()
         {
             return string.Format("{0}0000", DateTime.Now.ToString("yyyyMMddHH"));
+        } 
+
+        public static string GetCurrentPartition()
+        {
+            return PartitionMedthod();
         }
     }
 }

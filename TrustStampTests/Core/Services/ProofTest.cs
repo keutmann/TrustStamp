@@ -35,10 +35,26 @@ namespace TrustStampTests.Core.Services
         }
 
         [Test]
-        public void TestMethod2()
+        public void TestGetUnprocessed()
         {
-            // TODO: Add your test code here
-            Assert.Pass("Your second passing test");
+            int numOfPartitions = 9;
+            // Build Test
+            var proof = new Proof();
+            for (int par = 1; par <= numOfPartitions; par++)
+            {
+                Batch.PartitionMedthod = () => string.Format("{0}{1}00", DateTime.Now.ToString("yyyyMMddHH"), par);
+                for (int i = 0; i < 10; i++)
+                {
+                    var id = ID.RandomSHA256Hex();
+                    var item = proof.Add(id);
+                }
+            }
+
+            // Read
+            var partitions = proof.UnprocessedPartitions();
+
+            // Test
+            Assert.AreEqual(numOfPartitions, partitions.Count);
         }
 
     }

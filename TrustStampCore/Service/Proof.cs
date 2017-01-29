@@ -15,18 +15,17 @@ namespace TrustStampCore.Service
         public JObject Add(string id)
         {
             var idContainer = new ID(id);
-
+            
             using (var db = TimeStampDatabase.Open())
             {
-                var table = ProofTable.Get(db.Connection);
                 var safeId = idContainer.GetSafeSHA256ID();
 
-                var item = table.GetByHash(safeId);
+                var item = db.Proof.GetByHash(safeId);
                 if (item != null)
                     return item;
 
-                item = table.NewItem(safeId, null, Batch.TimeStampSlice());
-                table.Add(item);
+                item = db.Proof.NewItem(safeId, null, Batch.GetCurrentPartition(), DateTime.Now.ToString());
+                db.Proof.Add(item);
 
                 return item;
             }
@@ -38,13 +37,22 @@ namespace TrustStampCore.Service
             
             using (var db = TimeStampDatabase.Open())
             {
-                var table = ProofTable.Get(db.Connection);
+                var table = new ProofTable(db.Connection);
 
                 var item = table.GetByHash(idContainer.GetSafeSHA256ID());
                 if (item != null)
                     return item;
 
                 return null;
+            }
+        }
+
+        public JArray UnprocessedPartitions()
+        {
+            using (var db = TimeStampDatabase.Open())
+            {
+                var table = new ProofTable(db.Connection);
+                return table.GetUnprocessed();
             }
         }
 

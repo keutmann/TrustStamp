@@ -14,12 +14,20 @@ namespace TrustStampCore.Repository
 
         public static string MemoryConnectionString = "Data Source=:memory:;Version=3;";
         public static TimeStampDatabase MemoryDatabase;
+        public static bool IsMemoryDatabase { get; set; }
 
         public SQLiteConnection Connection;
 
         public string Name { get; set; }
 
-        public static bool IsMemoryDatabase {get;set;}
+        public ProofTable _proof = null;
+        public ProofTable Proof
+        {
+            get
+            {
+                return _proof ?? (_proof = new ProofTable(Connection));
+            }
+        }
 
         public TimeStampDatabase()
         {
@@ -30,13 +38,14 @@ namespace TrustStampCore.Repository
         public TimeStampDatabase(string name)
         {
             Name = name;
-            CreateIfNotExist();
         }
 
         public void CreateIfNotExist()
         {
-            if (!IsMemoryDatabase && !File.Exists(Name))
-                SQLiteConnection.CreateFile(Name);
+            if (!IsMemoryDatabase && !File.Exists(DatabaseFilename))
+                SQLiteConnection.CreateFile(DatabaseFilename);
+
+            Proof.CreateIfNotExist();
         }
 
         public SQLiteConnection OpenConnection()
@@ -75,6 +84,7 @@ namespace TrustStampCore.Repository
                 if (MemoryDatabase == null) { 
                     MemoryDatabase = new TimeStampDatabase();
                     MemoryDatabase.OpenConnection();
+                    MemoryDatabase.CreateIfNotExist();
                 }
                 return MemoryDatabase;
             }
