@@ -62,7 +62,7 @@ namespace TrustStampCore.Repository
             command.Parameters.Add(new SQLiteParameter("@hash", hash));
             SQLiteDataReader reader = command.ExecuteReader();
             if(reader.Read())
-                result.Add(NewItem(reader));
+                result.Add(NewItemDefaultReader(reader));
 
             return result;
         }
