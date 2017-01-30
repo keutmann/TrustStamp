@@ -57,7 +57,12 @@ namespace TrustStampTests.Core.Services
                 var partition = batchItemToProcess["partition"].ToString();
 
                 batch.Process(db);
+
+
                 var proofProcessed = db.Proof.GetByPartition(partition);
+
+                batchItemToProcess = db.Batch.GetByPartition(partition);
+                Console.WriteLine("Bitcoin tx: "+ batchItemToProcess["tx"].ToString());
 
                 foreach (var item in proofProcessed)
                 {

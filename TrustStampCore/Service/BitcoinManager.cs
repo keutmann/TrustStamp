@@ -21,7 +21,7 @@ namespace TrustStampCore.Service
         {
             var crypt = SHA256.Create();
 
-            key32 = new Key(crypt.ComputeHash(Encoding.Unicode.GetBytes("TrustStampCoreDemo")), 32, true);
+            key32 = new Key(crypt.ComputeHash(Encoding.Unicode.GetBytes("Carsten Keutmann")), 32, true);
             adr32 = key32.PubKey.GetAddress(CurrentNetwork);
         }
 

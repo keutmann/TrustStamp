@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TrustStampCore.Repository;
 using TrustStampCore.Extensions;
 using TrustStampCore.Models;
+using NBitcoin;
 
 namespace TrustStampCore.Service
 {
@@ -63,20 +64,59 @@ namespace TrustStampCore.Service
             return batchItem;
         }
 
-        public void Process(TimeStampDatabase db)
+        public bool Process(TimeStampDatabase db)
         {
             var batchItem = GetNextBatchToProcess(db);
-            switch (batchItem["state"].ToString().ToLower())
+            if (batchItem == null)
+                return false;
+
+            if (batchItem["state"].ToString().Equals(BatchState.New))
+                BuildMerkle(batchItem, db);
+
+            if (batchItem["state"].ToString().Equals(BatchState.BuildMerkleDone))
+                TimeStampBatch(batchItem, db);
+
+            return true;
+        }
+
+        private void TimeStampBatch(JObject batchItem, TimeStampDatabase db)
+        {
+            batchItem["state"] = BatchState.Timestamping;
+            db.Batch.Update(batchItem);
+
+            Transaction previousTx = null;
+            var btc = new BitcoinManager();
+
+            var hash = batchItem["root"].ToString().ToBytes();
+            var result = btc.Send(hash, previousTx);
+            if (result.status == "success")
             {
-                case "new": BuildMerkle(batchItem, db); break;
+                // Not working
+                //previousTx = result.Tx; // Save the current tx for later use in the next spent (support for unconfirmed spending!)
+                var tx = (JArray)batchItem["tx"];
+                tx.Add(new JObject(
+                    new JProperty("protocol", "bitcoin"),
+                    new JProperty("transaction", result.data)
+                    ));
+
+                batchItem["state"] = BatchState.TimeStampDone;
+                db.Batch.Update(batchItem);
+            }
+            else
+            {
+                batchItem["state"] = BatchState.Failed;
+                db.Batch.Update(batchItem);
             }
         }
 
         private void BuildMerkle(JObject batchItem, TimeStampDatabase db)
         {
+            batchItem["state"] = BatchState.BuildMerkle;
+            db.Batch.Update(batchItem);
+
             var proofs = db.Proof.GetByPartition(batchItem["partition"].ToString());
 
-            var leafNodes = new List<Models.TreeEntity>();
+            var leafNodes = new List<TreeEntity>();
             // Build
             using (var merkleTree = new MerkleTree())
             {
@@ -97,7 +137,7 @@ namespace TrustStampCore.Service
                 }
 
                 batchItem["root"] = rootNode.Hash.ToHex();
-                batchItem["state"] = "build";
+                batchItem["state"] = BatchState.BuildMerkleDone;
 
                 db.Batch.Update(batchItem);
 
