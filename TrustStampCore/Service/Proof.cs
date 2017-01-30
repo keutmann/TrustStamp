@@ -24,7 +24,7 @@ namespace TrustStampCore.Service
                 if (item != null)
                     return item;
 
-                item = db.Proof.NewItem(safeId, null, Batch.GetCurrentPartition(), DateTime.Now.ToString());
+                item = db.Proof.NewItem(safeId, null, Batch.GetCurrentPartition(), DateTime.Now);
                 db.Proof.Add(item);
 
                 return item;

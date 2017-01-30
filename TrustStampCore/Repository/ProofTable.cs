@@ -16,21 +16,15 @@ namespace TrustStampCore.Repository
         {
             Connection = connection;
             TableName = tableName;
-            CreateIfNotExist();
+            //CreateIfNotExist();
         }
-
-        //public static ProofTable Get(SQLiteConnection connection)
-        //{
-        //    var table = new ProofTable(connection);
-        //    return table;
-        //}
 
         public void CreateIfNotExist()
         {
             if (TableExist())
                 return;
 
-            string sql = "create table if not exists Proof "+
+            string sql = "CREATE TABLE IF NOT EXISTS Proof "+
                 "(id integer primary key," +
                 "hash text,"+
                 "path text," +
@@ -39,32 +33,34 @@ namespace TrustStampCore.Repository
             var command = new SQLiteCommand(sql, Connection);
             command.ExecuteNonQuery();
 
-            sql = "CREATE UNIQUE INDEX IF NOT EXISTS ProofHash on Proof (hash)";
-            command = new SQLiteCommand(sql, Connection);
+            command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS ProofHash ON Proof (hash)", Connection);
             command.ExecuteNonQuery();
         }
 
 
-        public void Add(JObject batch)
+        public void Add(JObject proof)
         {
-            SQLiteCommand insertSQL = new SQLiteCommand("insert into Proof (hash, path, partition, timestamp) values (@hash,@path,@partition,@timestamp)", Connection);
-            insertSQL.Parameters.Add(new SQLiteParameter("@hash", batch["hash"]));
-            insertSQL.Parameters.Add(new SQLiteParameter("@path", batch["path"]));
-            insertSQL.Parameters.Add(new SQLiteParameter("@partition", batch["partition"]));
-            insertSQL.Parameters.Add(new SQLiteParameter("@timestamp", batch["timestamp"]));
+            SQLiteCommand insertSQL = new SQLiteCommand("INSERT INTO Proof (hash, path, partition, timestamp) VALUES (@hash,@path,@partition,@timestamp)", Connection);
+            insertSQL.Parameters.Add(new SQLiteParameter("@hash", proof["hash"]));
+            insertSQL.Parameters.Add(new SQLiteParameter("@path", proof["path"]));
+            insertSQL.Parameters.Add(new SQLiteParameter("@partition", proof["partition"]));
+            insertSQL.Parameters.Add(new SQLiteParameter("@timestamp", (DateTime)proof["timestamp"]));
+            insertSQL.ExecuteNonQuery();
+        }
+
+        public void UpdatePath(JObject proof)
+        {
+            var insertSQL = new SQLiteCommand("UPDATE Proof SET path = @path WHERE hash = @hash", Connection);
+            insertSQL.Parameters.Add(new SQLiteParameter("@hash", proof["hash"]));
+            insertSQL.Parameters.Add(new SQLiteParameter("@path", proof["path"]));
             insertSQL.ExecuteNonQuery();
         }
 
         public JObject GetByHash(string hash)
         {
-            JObject result = null;
-            SQLiteCommand command = new SQLiteCommand("select * from Proof where hash = @hash", Connection);
+            SQLiteCommand command = new SQLiteCommand("select * from Proof where hash = @hash LIMIT 1", Connection);
             command.Parameters.Add(new SQLiteParameter("@hash", hash));
-            SQLiteDataReader reader = command.ExecuteReader();
-            if(reader.Read())
-                result.Add(NewItemDefaultReader(reader));
-
-            return result;
+            return (JObject)Query(command, NewItem).FirstOrDefault();
         }
 
         public JArray GetUnprocessed()
@@ -73,21 +69,14 @@ namespace TrustStampCore.Repository
             return Query(command, (reader) => new JObject(new JProperty("partition", reader["partition"])));
         }
 
-        public JArray Query(SQLiteCommand command, Func<SQLiteDataReader, JObject> newItemMethod = null)
+        public JArray GetByPartition(string partition)
         {
-            if (newItemMethod == null)
-                newItemMethod = NewItemDefaultReader;
-
-            JArray result = new JArray();
-            SQLiteDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-                result.Add(newItemMethod(reader));
-            
-
-            return result;
+            var command = new SQLiteCommand("SELECT * FROM Proof WHERE partition = @partition", Connection);
+            command.Parameters.Add(new SQLiteParameter("@partition", partition));
+            return Query(command, NewItem);
         }
 
-        public JObject NewItemDefaultReader(SQLiteDataReader reader)
+        public JObject NewItem(SQLiteDataReader reader)
         {
             return NewItem(reader["hash"], reader["path"], reader["partition"], reader["timestamp"]);
         }

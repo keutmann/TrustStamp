@@ -37,18 +37,10 @@ namespace TrustStampTests.Core.Services
         [Test]
         public void TestGetUnprocessed()
         {
+            var proof = new Proof();
             int numOfPartitions = 9;
             // Build Test
-            var proof = new Proof();
-            for (int par = 1; par <= numOfPartitions; par++)
-            {
-                Batch.PartitionMedthod = () => string.Format("{0}{1}00", DateTime.Now.ToString("yyyyMMddHH"), par);
-                for (int i = 0; i < 10; i++)
-                {
-                    var id = ID.RandomSHA256Hex();
-                    var item = proof.Add(id);
-                }
-            }
+            BuildUnprocessed(proof, numOfPartitions, DateTime.Now);
 
             // Read
             var partitions = proof.UnprocessedPartitions();
@@ -57,6 +49,18 @@ namespace TrustStampTests.Core.Services
             Assert.AreEqual(numOfPartitions, partitions.Count);
         }
 
+        public static void BuildUnprocessed(Proof proof, int numOfPartitions, DateTime partitionDate)
+        {
+            for (int par = 1; par <= numOfPartitions; par++)
+            {
+                Batch.PartitionMethod = () => string.Format("{0}{1}00", partitionDate.ToString("yyyyMMddHH"), par);
+                for (int i = 0; i < 10; i++)
+                {
+                    var id = ID.RandomSHA256Hex();
+                    var item = proof.Add(id);
+                }
+            }
+        }
     }
 }
 

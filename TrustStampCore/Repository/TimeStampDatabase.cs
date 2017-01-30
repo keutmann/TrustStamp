@@ -29,6 +29,15 @@ namespace TrustStampCore.Repository
             }
         }
 
+        public BatchTable _batch = null;
+        public BatchTable Batch
+        {
+            get
+            {
+                return _batch ?? (_batch = new BatchTable(Connection));
+            }
+        }
+
         public TimeStampDatabase()
         {
             IsMemoryDatabase = true;
@@ -46,6 +55,7 @@ namespace TrustStampCore.Repository
                 SQLiteConnection.CreateFile(DatabaseFilename);
 
             Proof.CreateIfNotExist();
+            Batch.CreateIfNotExist();
         }
 
         public SQLiteConnection OpenConnection()

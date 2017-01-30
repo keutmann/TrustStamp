@@ -14,7 +14,7 @@ namespace TrustStampCore.Extensions
             return s.ToArray();
         }
 
-        public static byte[] ToBytes(string hex)
+        public static byte[] ToBytes(this string hex)
         {
             if (hex.Length % 2 == 1)
                 throw new Exception("The binary key cannot have an odd number of digits");

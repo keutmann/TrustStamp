@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
@@ -19,6 +20,19 @@ namespace TrustStampCore.Repository
             command.Parameters.Add(new SQLiteParameter("@table", TableName));
             var reader = command.ExecuteReader();
             return (reader.Read());
+        }
+
+        public JArray Query(SQLiteCommand command, Func<SQLiteDataReader, JObject> newItemMethod = null)
+        {
+            if (newItemMethod == null)
+                throw new MissingMethodException("Missing newItemMethod");
+
+            var result = new JArray();
+            SQLiteDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+                result.Add(newItemMethod(reader));
+
+            return result;
         }
     }
 }

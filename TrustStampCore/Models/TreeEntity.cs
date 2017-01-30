@@ -3,6 +3,8 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Web;
+using TrustStampCore.Extensions;
+
 
 namespace TrustStampCore.Models
 {
@@ -44,25 +46,20 @@ namespace TrustStampCore.Models
             Hash = crypt.ComputeHash(Source);
         }
 
+        public TreeEntity(string hash)
+        {
+            Hash = hash.ToBytes();
+        }
+
         public TreeEntity(byte[] hash)
         {
             Hash = hash;
         }
 
-        public TreeEntity(JObject entity)
+        public TreeEntity(JObject entity) : this(entity["hash"].ToString())
         {
             Entity = entity;
-            //Hash = HttpServerUtility.UrlTokenDecode(entity.RowKey);
         }
-
-        public void Copy()
-        {
-            if (Entity == null)
-                return;
-
-            Entity["Path"] = this.MerkleTree;
-        }
-
     }
 
 }
