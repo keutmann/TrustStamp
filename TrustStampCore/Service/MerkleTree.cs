@@ -10,30 +10,43 @@ namespace TrustStampCore.Service
 {
     public class MerkleTree : IDisposable
     {
-        public HashAlgorithm Crypt { get; set; }
+        public static HashAlgorithm Crypt = SHA256.Create();
 
         public MerkleTree()
         {
-            Crypt = SHA256Managed.Create();
-
         }
+
         public TreeEntity BuildTree(List<TreeEntity> leafNodes)
         {
-            TreeEntity root = null;
-            var nodes = leafNodes;
+            var nodes = new Queue<TreeEntity>(leafNodes);
             // Make Tree
             while (nodes.Count > 1)
             {
-                var parents = new List<TreeEntity>();
-                for (var i = 0; i < nodes.Count; i += 2)
+                var parents = new Queue<TreeEntity>();
+                while (nodes.Count > 0)
                 {
-                    parents.Add(new TreeEntity(Crypt, nodes[i], (i + 1 < nodes.Count) ? nodes[i + 1] : null));
+                    var first = nodes.Dequeue();
+                    var second = nodes.Dequeue();
+                    if (second == null)
+                    {
+                        parents.Enqueue(first);
+                        break; // Stop no more nodes!
+                    }
+
+                    if (ByteArrayCompare(first.Hash, second.Hash) > 0)
+                        parents.Enqueue(new TreeEntity(Crypt, first, second));
+                    else
+                        parents.Enqueue(new TreeEntity(Crypt, second, first));
                 }
+
+                //for (var i = 0; i < nodes.Count; i += 2)
+                //{
+                //    parents.Add(new TreeEntity(Crypt, nodes[i], (i + 1 < nodes.Count) ? nodes[i + 1] : null));
+                //}
 
                 nodes = parents;
             }
-            root = nodes[0];
-            return root;
+            return nodes.FirstOrDefault(); // root
         }
 
         public void ComputeMerkleTree(TreeEntity root)
@@ -59,14 +72,14 @@ namespace TrustStampCore.Service
             if (node.Left != null)
             {
                 merkle.Push(node.Right.Hash);
-                merkle.Push(new byte[] { 0 }); // right code
+                //merkle.Push(new byte[] { 0 }); // right code
                 ComputeMerkleTree(node.Left, merkle);
             }
 
             if (node.Right != null)
             {
                 merkle.Push(node.Left.Hash);
-                merkle.Push(new byte[] { 1 }); // left code
+                //merkle.Push(new byte[] { 1 }); // left code
                 ComputeMerkleTree(node.Right, merkle);
             }
 
@@ -93,32 +106,34 @@ namespace TrustStampCore.Service
         //    return hash;
         //}
 
-        public static byte[] ComputeRoot(HashAlgorithm crypt, byte[] hash, byte[] path)
-        {
-            for (var i = 0; i < path.Length; i += 33)
-            {
-
-                var code = path[i];
-                var merkle = new byte[32];
-                Array.Copy(path, i + 1, merkle, 0, 32);
-
-                hash = (code == 0) ? crypt.ComputeHash(crypt.ComputeHash(hash.Concat(merkle).ToArray())) : crypt.ComputeHash(crypt.ComputeHash(Hex.Combine(merkle, hash)));
-            }
-            return hash;
-        }
+        //public static byte[] ComputeRoot(HashAlgorithm crypt, byte[] hash, byte[] path)
+        //{
+        //    for (var i = 0; i < path.Length; i += 32)
+        //    {
+        //        //var code = path[i];
+                
+        //        var merkle = new byte[32];
+        //        Array.Copy(path, i + 1, merkle, 0, 32);
+        //        var code = ByteArrayCompare(hash, merkle);
+        //        if(code > 0)
+        //            hash = crypt.ComputeHash(crypt.ComputeHash(hash.Concat(merkle).ToArray())) : crypt.ComputeHash(crypt.ComputeHash(Hex.Combine(merkle, hash)));
+        //    }
+        //    return hash;
+        //}
 
 
         public byte[] ComputeRoot(TreeEntity node)
         {
             var hash = node.Hash;
-            for (var i = 0; i < node.MerkleTree.Length; i += 33)
+            for (var i = 0; i < node.MerkleTree.Length; i += 32)
             {
-
-                var code = node.MerkleTree[i];
+                //var code = node.MerkleTree[i]; No more code!
                 var merkle = new byte[32];
-                Array.Copy(node.MerkleTree, i + 1, merkle, 0, 32);
-
-                hash = (code == 0) ? Crypt.ComputeHash(Crypt.ComputeHash(Hex.Combine(hash, merkle))) : Crypt.ComputeHash(Crypt.ComputeHash(Hex.Combine(merkle, hash)));
+                Array.Copy(node.MerkleTree, i, merkle, 0, 32);
+                if (ByteArrayCompare(hash, merkle) > 0)
+                    hash = Crypt.ComputeHash(Crypt.ComputeHash(Hex.Combine(hash, merkle)));
+                else
+                    hash = Crypt.ComputeHash(Crypt.ComputeHash(Hex.Combine(merkle, hash)));
             }
             return hash;
         }
@@ -128,5 +143,23 @@ namespace TrustStampCore.Service
             if (Crypt != null)
                 Crypt.Dispose();
         }
+
+        static int ByteArrayCompare(byte[] a1, byte[] a2)
+        {
+            if (a1.Length != a2.Length)
+                throw new ApplicationException("Byte arrays has to have the same length");
+
+            for (int i = 0; i < a1.Length; i++)
+            {
+                if (a1[i] > a2[i])
+                    return 1;
+
+                if (a1[i] < a2[i])
+                    return -1;
+            }
+
+            return 0;
+        }
+
     }
 }
