@@ -22,7 +22,7 @@ namespace TrustStampCore.Models
 
         public JObject Entity { get; set; }
 
-        public TreeEntity(HashAlgorithm crypt, TreeEntity left, TreeEntity right)
+        public TreeEntity(byte[] hash, TreeEntity left, TreeEntity right)
         {
             Left = left;
             Left.Parent = this;
@@ -30,30 +30,13 @@ namespace TrustStampCore.Models
             Right = right ?? left;
             Right.Parent = this;
             Right.IsRight = true;
-            Hash = crypt.ComputeHash(crypt.ComputeHash(Left.Hash.Concat(Right.Hash).ToArray()));
-        }
-
-        public TreeEntity(HashAlgorithm crypt)
-        {
-            Guid guid = Guid.NewGuid();
-            Source = guid.ToByteArray();
-            Hash = crypt.ComputeHash(Source);
-        }
-
-        public TreeEntity(HashAlgorithm crypt, int index)
-        {
-            Source = new byte[] { (byte)index };
-            Hash = crypt.ComputeHash(Source);
+            //Hash = crypt.ComputeHash(crypt.ComputeHash(Left.Hash.Concat(Right.Hash).ToArray()));
+            Hash = hash;
         }
 
         public TreeEntity(string hash)
         {
             Hash = hash.ToBytes();
-        }
-
-        public TreeEntity(byte[] hash)
-        {
-            Hash = hash;
         }
 
         public TreeEntity(JObject entity) : this(entity["hash"].ToString())

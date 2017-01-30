@@ -7,13 +7,6 @@ namespace TrustStampCore.Extensions
 {
     public static class Hex
     {
-        public static byte[] Combine(byte[] left, byte[] right)
-        {
-            var s = new List<byte>(left);
-            s.AddRange(right);
-            return s.ToArray();
-        }
-
         public static byte[] ToBytes(this string hex)
         {
             if (hex.Length % 2 == 1)

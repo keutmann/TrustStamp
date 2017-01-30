@@ -118,31 +118,29 @@ namespace TrustStampCore.Service
 
             var leafNodes = new List<TreeEntity>();
             // Build
-            using (var merkleTree = new MerkleTree())
+            foreach (JObject proof in proofs)
             {
-                foreach (JObject proof in proofs)
-                {
-                    Console.WriteLine("Hash: Partition {0} - HASH {1}", proof["partition"], proof["hash"]);
-                    leafNodes.Add(new TreeEntity(proof));
-                }
-
-                var rootNode = merkleTree.BuildTree(leafNodes);
-                merkleTree.ComputeMerkleTree(rootNode);
-
-                // Update the path back to proof entities
-                foreach (var node in leafNodes)
-                {
-                    node.Entity["path"] = node.MerkleTree.ToHex();
-                    db.Proof.UpdatePath(node.Entity);
-                }
-
-                batchItem["root"] = rootNode.Hash.ToHex();
-                batchItem["state"] = BatchState.BuildMerkleDone;
-
-                db.Batch.Update(batchItem);
-
-                Console.WriteLine(String.Format("Root: {0}", batchItem["root"]));
+                Console.WriteLine("Hash: Partition {0} - HASH {1}", proof["partition"], proof["hash"]);
+                leafNodes.Add(new TreeEntity(proof));
             }
+
+            var merkleTree = new MerkleTree();
+            var rootNode = merkleTree.BuildTree(leafNodes);
+            merkleTree.ComputeMerkleTree(rootNode);
+
+            // Update the path back to proof entities
+            foreach (var node in leafNodes)
+            {
+                node.Entity["path"] = node.MerkleTree.ToHex();
+                db.Proof.UpdatePath(node.Entity);
+            }
+
+            batchItem["root"] = rootNode.Hash.ToHex();
+            batchItem["state"] = BatchState.BuildMerkleDone;
+
+            db.Batch.Update(batchItem);
+
+            Console.WriteLine(String.Format("Root: {0}", batchItem["root"]));
         }
     }
 }

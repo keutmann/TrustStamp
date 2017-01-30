@@ -83,6 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Extensions\Hex.cs" />
     <Compile Include="Models\TreeEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
