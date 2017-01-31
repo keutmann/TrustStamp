@@ -24,7 +24,7 @@ namespace TrustStampTests.Core.Services
             {
                 var hash = MerkleTree.HashStrategy(Encoding.Unicode.GetBytes(i.ToString()));
                 var proof = new JObject(new JProperty("hash", hash));
-                Console.WriteLine("Hash: {0}", ((byte[])proof["hash"]).ToHex());
+                Console.WriteLine("Hash: {0}", ((byte[])proof["hash"]).ConvertToHex());
                 leafNodes.Add(new MerkleNode(proof));
             }
 
@@ -32,12 +32,12 @@ namespace TrustStampTests.Core.Services
             var merkleTree = new MerkleTree(leafNodes);
             var rootNode = merkleTree.Build();
 
-            Console.WriteLine("Root node: " + rootNode.Hash.ToHex());
+            Console.WriteLine("Root node: " + rootNode.Hash.ConvertToHex());
 
             foreach (var entity in leafNodes)
             {
                 var calcRoot = MerkleTree.ComputeRoot(entity.Hash, entity.Path, MerkleTree.HashBytelength);
-                Console.WriteLine("Entity "+entity.Hash.ToHex() + " : "+entity.Path.ToHex());
+                Console.WriteLine("Entity "+entity.Hash.ConvertToHex() + " : "+entity.Path.ConvertToHex());
                 Assert.AreEqual(rootNode.Hash, calcRoot);
             }
         }

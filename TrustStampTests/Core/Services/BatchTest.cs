@@ -49,26 +49,23 @@ namespace TrustStampTests.Core.Services
             Batch.PartitionMethod = () => string.Format("{0}000", partitionDate.AddDays(1).ToString("yyyyMMddHH"));
 
             var batch = new Batch();
-            using (var db = TimeStampDatabase.Open())
+
+            // Reference batchItem
+            var batchItemToProcess = batch.GetNextBatchToProcess();
+            var partition = batchItemToProcess["partition"].ToString();
+
+            batch.Process();
+            var db = batch.DB;
+
+            var proofProcessed = db.Proof.GetByPartition(partition);
+
+            batchItemToProcess = db.Batch.GetByPartition(partition);
+            Console.WriteLine("Bitcoin tx: "+ batchItemToProcess["tx"].ToString());
+
+            foreach (var item in proofProcessed)
             {
-
-                // Reference batchItem
-                var batchItemToProcess = batch.GetNextBatchToProcess(db);
-                var partition = batchItemToProcess["partition"].ToString();
-
-                batch.Process(db);
-
-
-                var proofProcessed = db.Proof.GetByPartition(partition);
-
-                batchItemToProcess = db.Batch.GetByPartition(partition);
-                Console.WriteLine("Bitcoin tx: "+ batchItemToProcess["tx"].ToString());
-
-                foreach (var item in proofProcessed)
-                {
-                    Assert.IsNotEmpty(item["path"]+"");
-                    Console.WriteLine("Proof path: "+ item["path"]);
-                }
+                Assert.IsNotEmpty(item["path"]+"");
+                Console.WriteLine("Proof path: "+ item["path"]);
             }
         }
 

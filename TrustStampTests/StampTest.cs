@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TrustStampCore.Repository;
 
 namespace TrustStampTests
 {
@@ -11,7 +12,14 @@ namespace TrustStampTests
     {
         [SetUp]
         public virtual void Init()
-        { /* ... */ }
+        {
+            using (var db = TimeStampDatabase.Open())
+            {
+                db.Proof.DropTable();
+                db.Batch.DropTable();
+                db.CreateIfNotExist();
+            }
+        }
 
         [TearDown]
         public virtual void Dispose()

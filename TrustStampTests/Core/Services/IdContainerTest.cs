@@ -14,14 +14,21 @@ namespace TrustStampTests.Core.Services
     public class IdContainerTest : StampTest
     {
         [Test]
-        public void TestAdd()
+        public void TestHexParse()
         {
-            var id = ID.RandomHash().ToHex();
-            var container = new ID(id);
-            var hash = container.GetSafeHashFromHex();
-            var resultId = hash.ToHex();
-            Assert.AreEqual(id, resultId);
+            var id = Crypto.GetRandomHash().ConvertToHex();
+            var container = IDContainer.Parse(id);
+            Assert.AreEqual(id, container.Hash.ConvertToHex());
         }
+
+        [Test]
+        public void TestBase64Parse()
+        {
+            var id = Convert.ToBase64String(Crypto.GetRandomHash());
+            var container = IDContainer.Parse(id);
+            Assert.AreEqual(id, Convert.ToBase64String(container.Hash));
+        }
+
     }
 }
 

@@ -34,7 +34,7 @@ namespace TrustStampCore.Repository
             SQLiteCommand command = new SQLiteCommand(sql, Connection);
             command.ExecuteNonQuery();
 
-            command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS BatchRoot ON Batch (root)", Connection);
+            command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS BatchRoot ON Batch (root)", Connection);
             command.ExecuteNonQuery();
         }
 
@@ -60,6 +60,13 @@ namespace TrustStampCore.Repository
             insertSQL.Parameters.Add(new SQLiteParameter("@lastupdate", DateTime.Now));
             insertSQL.ExecuteNonQuery();
         }
+
+        public void DropTable()
+        {
+            var command = new SQLiteCommand("DROP TABLE Batch", Connection);
+            command.ExecuteNonQuery();
+        }
+
 
         public JObject GetByPartition(string partition)
         {

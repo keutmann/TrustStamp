@@ -85,7 +85,7 @@ namespace TrustStampServer
 
         public void Start(Settings settings)
         {
-            var test = Hex.ToBytes("AA"); // Just to make Api Controller able to find the BatchController in library assembly
+            var test = EncoderExtensions.ConvertFromHex("AA"); // Just to make Api Controller able to find the BatchController in library assembly, temporary solution
 
             Config = settings;
             var url = "http://"+settings.EndPoint.ToString();

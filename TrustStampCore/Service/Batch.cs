@@ -11,7 +11,7 @@ using NBitcoin;
 
 namespace TrustStampCore.Service
 {
-    public class Batch
+    public class Batch : BusinessDB
     {
         public static Func<string> PartitionMethod = DefaultPartition;
 
@@ -25,50 +25,49 @@ namespace TrustStampCore.Service
             return PartitionMethod();
         }
 
-
+        public Batch(TimeStampDatabase db = null) : base(db)
+        {
+        }
 
         public JObject Get(string partition)
         {
-            using (var db = TimeStampDatabase.Open())
-            {
-                return db.Batch.GetByPartition(partition);
-            }
+            return DB.Batch.GetByPartition(partition);
         }
 
-        public JObject GetNextBatchToProcess(TimeStampDatabase db)
+        public JObject GetNextBatchToProcess()
         {
             var currentPartition = GetCurrentPartition();// current partition snapshot
-            var partitions = db.Proof.GetUnprocessed(); // partitions are ordered!
+            var partitions = DB.Proof.GetUnprocessed(); // partitions are ordered!
             var partitionItem = partitions.FirstOrDefault(p => currentPartition.CompareTo(p["partition"].ToString()) > 0);// we what a partion before current partition;
             if (partitionItem == null)
                 return null; // No partitions to be processed
 
             var partition = partitionItem["partition"].ToString();
 
-            var batchItem = db.Batch.Ensure(partition); // Ensure that a batch is created in the db if missing
+            var batchItem = DB.Batch.Ensure(partition); // Ensure that a batch is created in the db if missing
 
             return batchItem;
         }
 
-        public bool Process(TimeStampDatabase db)
+        public bool Process()
         {
-            var batchItem = GetNextBatchToProcess(db);
+            var batchItem = GetNextBatchToProcess();
             if (batchItem == null)
                 return false;
 
             if (batchItem["state"].ToString().Equals(BatchState.New))
-                BuildMerkle(batchItem, db);
+                BuildMerkle(batchItem);
 
-            if (batchItem["state"].ToString().Equals(BatchState.BuildMerkleDone))
-                TimeStampBatch(batchItem, db);
+            if (batchItem["state"].ToString().Equals(BatchState.BuildMerkleDone) && !TimeStampDatabase.IsMemoryDatabase)
+                TimeStampBatch(batchItem);
 
             return true;
         }
 
-        private void TimeStampBatch(JObject batchItem, TimeStampDatabase db)
+        private void TimeStampBatch(JObject batchItem)
         {
             batchItem["state"] = BatchState.Timestamping;
-            db.Batch.Update(batchItem);
+            DB.Batch.Update(batchItem);
 
             Transaction previousTx = null;
             var btc = new BitcoinManager();
@@ -86,21 +85,21 @@ namespace TrustStampCore.Service
                     ));
 
                 batchItem["state"] = BatchState.TimeStampDone;
-                db.Batch.Update(batchItem);
+                DB.Batch.Update(batchItem);
             }
             else
             {
                 batchItem["state"] = BatchState.Failed;
-                db.Batch.Update(batchItem);
+                DB.Batch.Update(batchItem);
             }
         }
 
-        private void BuildMerkle(JObject batchItem, TimeStampDatabase db)
+        private void BuildMerkle(JObject batchItem)
         {
             batchItem["state"] = BatchState.BuildMerkle;
-            db.Batch.Update(batchItem);
+            DB.Batch.Update(batchItem);
 
-            var proofs = db.Proof.GetByPartition(batchItem["partition"].ToString());
+            var proofs = DB.Proof.GetByPartition(batchItem["partition"].ToString());
 
             var leafNodes = from p in proofs 
                             select new Models.MerkleNode((JObject)p);
@@ -110,14 +109,14 @@ namespace TrustStampCore.Service
 
             // Update the path back to proof entities
             foreach (var node in merkleTree.LeafNodes)
-                db.Proof.UpdatePath(node.Hash, node.Path);
+                DB.Proof.UpdatePath(node.Hash, node.Path);
 
             batchItem["root"] = rootNode.Hash;
             batchItem["state"] = BatchState.BuildMerkleDone;
 
-            db.Batch.Update(batchItem);
+            DB.Batch.Update(batchItem);
 
-            Console.WriteLine(String.Format("Root: {0}", ((byte[])batchItem["root"]).ToHex()));
+            Console.WriteLine(String.Format("Root: {0}", ((byte[])batchItem["root"]).ConvertToHex()));
         }
     }
 }

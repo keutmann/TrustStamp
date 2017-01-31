@@ -37,25 +37,25 @@ namespace TrustStampTests.Core.Services
 
 
 
-        [Test]
-        public void ClientTest()
-        {
-            using (WebClient client = new WebClient())
-            {
-                var id = ID.GetHash("Test").ToHex();
-                var url = "http://"+service.Config.EndPoint + ProofController.Path + id;
+        //[Test]
+        //public void ClientTest()
+        //{
+        //    using (WebClient client = new WebClient())
+        //    {
+        //        var id = Crypto.GetHash("Test").ConvertToHex();
+        //        var url = "http://"+service.Config.EndPoint + ProofController.Path + id;
 
-                // Add hash to database
-                client.UploadString(url, id);
+        //        // Add hash to database
+        //        client.UploadString(url, id);
 
-                // Get hash object from database
-                var json = client.DownloadString(url);
+        //        // Get hash object from database
+        //        var json = client.DownloadString(url);
 
-                var obj = JObject.Parse(json);
+        //        var obj = JObject.Parse(json);
 
-                Assert.AreEqual(id, ((byte[])obj["hash"]).ToHex());
-            }
-        }
+        //        Assert.AreEqual(id, ((byte[])obj["hash"]).ConvertToHex());
+        //    }
+        //}
 
     }
 }

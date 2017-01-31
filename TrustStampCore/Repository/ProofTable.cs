@@ -23,14 +23,14 @@ namespace TrustStampCore.Repository
 
             string sql = "CREATE TABLE IF NOT EXISTS Proof "+
                 "(id INTEGER PRIMARY KEY," +
-                "hash BLOB,"+
+                "hash BLOB," +
                 "path BLOB," +
                 "partition TEXT," +
                 "timestamp DATETIME)";
             var command = new SQLiteCommand(sql, Connection);
             command.ExecuteNonQuery();
 
-            command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS ProofHash ON Proof (hash)", Connection);
+            command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS ProofHash ON Proof (hash)", Connection);
             command.ExecuteNonQuery();
         }
 
@@ -60,14 +60,14 @@ namespace TrustStampCore.Repository
 
         public JObject GetByHash(byte[] hash)
         {
-            SQLiteCommand command = new SQLiteCommand("select * from Proof where hash = @hash LIMIT 1", Connection);
+            var command = new SQLiteCommand("select * from Proof where hash = @hash LIMIT 1", Connection);
             command.Parameters.Add(new SQLiteParameter("@hash", hash));
             return (JObject)Query(command, NewItem).FirstOrDefault();
         }
 
         public JArray GetUnprocessed()
         {
-            SQLiteCommand command = new SQLiteCommand("SELECT DISTINCT partition FROM Proof WHERE path IS NULL or path ='' ORDER BY partition", Connection);
+            var command = new SQLiteCommand("SELECT DISTINCT partition FROM Proof WHERE path IS NULL or path ='' ORDER BY partition", Connection);
             return Query(command, (reader) => new JObject(new JProperty("partition", reader["partition"])));
         }
 
@@ -76,6 +76,12 @@ namespace TrustStampCore.Repository
             var command = new SQLiteCommand("SELECT * FROM Proof WHERE partition = @partition", Connection);
             command.Parameters.Add(new SQLiteParameter("@partition", partition));
             return Query(command, NewItem);
+        }
+
+        public void DropTable()
+        {
+            var command = new SQLiteCommand("DROP TABLE Proof", Connection);
+            command.ExecuteNonQuery();
         }
 
         public JObject NewItem(SQLiteDataReader reader)
