@@ -58,7 +58,7 @@ namespace TrustStampCore.Repository
             insertSQL.ExecuteNonQuery();
         }
 
-        public JObject GetByHash(string hash)
+        public JObject GetByHash(byte[] hash)
         {
             SQLiteCommand command = new SQLiteCommand("select * from Proof where hash = @hash LIMIT 1", Connection);
             command.Parameters.Add(new SQLiteParameter("@hash", hash));

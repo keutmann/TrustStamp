@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Core\Services\BatchTest.cs" />
     <Compile Include="Core\Services\MerkleTreeTest.cs" />
+    <Compile Include="Core\Services\IdContainerTest.cs" />
     <Compile Include="Core\Services\ProofTest.cs" />
     <Compile Include="Server\ServerTest.cs" />
     <Compile Include="SetupFixture.cs" />

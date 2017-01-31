@@ -94,6 +94,7 @@
     <Compile Include="Service\Batch.cs" />
     <Compile Include="Service\BatchState.cs" />
     <Compile Include="Service\BitcoinManager.cs" />
+    <Compile Include="Service\Crypto.cs" />
     <Compile Include="Service\ID.cs" />
     <Compile Include="Service\MerkleTree.cs" />
     <Compile Include="Controllers\ProofController.cs" />

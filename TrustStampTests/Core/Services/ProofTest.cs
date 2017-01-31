@@ -13,25 +13,14 @@ namespace TrustStampTests.Core.Services
     [TestFixture]
     public class ProofTest : StampTest
     {
-        public override void Init()
-        {
-            Console.WriteLine("Run init on ProofTest");
-
-        }
-
-        public override void Dispose()
-        {
-            Console.WriteLine("Run Dispose on ProofTest");
-        }
-
         [Test]
         public void TestAdd()
         {
-            var id = ID.RandomSHA256Hex().ToLower(); // ToLower for making it a "not" safe id
+            var id = ID.RandomHash().ToHex();
             var p = new Proof();
             var item = p.Add(id);
-
-            Assert.AreEqual(id.ToUpper(), ((byte[])item["hash"]).ToHex());
+            var resultId = ((byte[])item["hash"]).ToHex();
+            Assert.AreEqual(id, resultId);
         }
 
         [Test]
@@ -56,7 +45,7 @@ namespace TrustStampTests.Core.Services
                 Batch.PartitionMethod = () => string.Format("{0}{1}00", partitionDate.ToString("yyyyMMddHH"), par);
                 for (int i = 0; i < 10; i++)
                 {
-                    var id = ID.RandomSHA256Hex();
+                    var id = ID.RandomHash().ToHex();
                     var item = proof.Add(id);
                 }
             }

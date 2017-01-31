@@ -18,13 +18,13 @@ namespace TrustStampCore.Service
             
             using (var db = TimeStampDatabase.Open())
             {
-                var safeId = idContainer.GetSafeSHA256ID();
+                var hash = idContainer.GetSafeHashFromHex();
 
-                var item = db.Proof.GetByHash(safeId);
+                var item = db.Proof.GetByHash(hash);
                 if (item != null)
                     return item;
 
-                item = db.Proof.NewItem(safeId, null, Batch.GetCurrentPartition(), DateTime.Now);
+                item = db.Proof.NewItem(hash, null, Batch.GetCurrentPartition(), DateTime.Now);
                 db.Proof.Add(item);
 
                 return item;
@@ -39,7 +39,7 @@ namespace TrustStampCore.Service
             {
                 var table = new ProofTable(db.Connection);
 
-                var item = table.GetByHash(idContainer.GetSafeSHA256ID());
+                var item = table.GetByHash(idContainer.GetSafeHashFromHex());
                 if (item != null)
                     return item;
 

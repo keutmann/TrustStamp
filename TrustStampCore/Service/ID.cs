@@ -11,7 +11,7 @@ namespace TrustStampCore.Service
 {
     public class ID 
     {
-        public static SHA256 Crypt = SHA256.Create();
+        //public static SHA256 Crypt = SHA256.Create();
 
         public string RawID { get; set; }
 
@@ -20,33 +20,40 @@ namespace TrustStampCore.Service
             RawID = id;
         }
 
-        public string GetSafeSHA256ID()
+        public byte[] GetSafeHashFromHex()
         {
             byte[] hash;
             if (string.IsNullOrEmpty(RawID))
                 throw new ApplicationException("Value cannot be empty");
 
             var id = this.RawID.ToUpper(); // Ensure that the same hash value
-            if (id.Length != 64)
-                throw new ApplicationException("Value is not 64 charators long");
+            //if (id.Length != 64)
+            //    throw new ApplicationException("Value is not 64 charators long");
 
             hash = Hex.ToBytes(id);
-            if (hash.Length != 32)
-                throw new ApplicationException("Invalid SHA256 hash format, byte length is " + hash.Length);
+            //if (hash.Length != 32)
+            //    throw new ApplicationException("Invalid SHA256 hash format, byte length is " + hash.Length);
 
-            return id;
+            return hash;
         }
 
-        public static string RandomSHA256Hex()
+        public static byte[] RandomHash()
         {
-            var hash =  Crypt.ComputeHash(Encoding.Unicode.GetBytes(Guid.NewGuid().ToString()));
-            return hash.ToHex().ToUpper();
+            var hash = Crypto.HashStrategy(Encoding.Unicode.GetBytes(Guid.NewGuid().ToString()));
+            return hash;
         }
 
-        public static string GetSHA256Hex(string data)
+
+        //public static string RandomSHA256Hex()
+        //{
+        //    var hash =  Crypt.ComputeHash(Encoding.Unicode.GetBytes(Guid.NewGuid().ToString()));
+        //    return hash.ToHex().ToUpper();
+        //}
+
+        public static byte[] GetHash(string data)
         {
-            var hash = Crypt.ComputeHash(Encoding.Unicode.GetBytes(data));
-            return hash.ToHex().ToUpper();
+            var hash = Crypto.HashStrategy(Encoding.Unicode.GetBytes(data));
+            return hash;
         }
 
     }

@@ -42,7 +42,7 @@ namespace TrustStampTests.Core.Services
         {
             using (WebClient client = new WebClient())
             {
-                var id = ID.GetSHA256Hex("Test");
+                var id = ID.GetHash("Test").ToHex();
                 var url = "http://"+service.Config.EndPoint + ProofController.Path + id;
 
                 // Add hash to database

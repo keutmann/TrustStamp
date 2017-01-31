@@ -12,7 +12,7 @@ namespace TrustStampCore.Service
     public class MerkleTree 
     {
         public static int HashBytelength = 20;
-        public static Func<byte[],byte[]> HashStrategy = (i) => Hashes.RIPEMD160(Hashes.Hash256(i).ToBytes(),0,32);
+        public static Func<byte[], byte[]> HashStrategy = Crypto.HashStrategy; //(i) => Hashes.RIPEMD160(Hashes.Hash256(i).ToBytes(),0,32);
 
         public IEnumerable<MerkleNode> LeafNodes { get; }
 
