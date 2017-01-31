@@ -53,7 +53,7 @@ namespace TrustStampTests.Core.Services
 
                 var obj = JObject.Parse(json);
 
-                Assert.AreEqual(id, obj["hash"].ToString());
+                Assert.AreEqual(id, ((byte[])obj["hash"]).ToHex());
             }
         }
 

@@ -10,13 +10,10 @@ namespace TrustStampCore.Repository
 {
     public class ProofTable : DBTable
     {
-
-
         public ProofTable(SQLiteConnection connection, string tableName = "Proof")
         {
             Connection = connection;
             TableName = tableName;
-            //CreateIfNotExist();
         }
 
         public void CreateIfNotExist()
@@ -25,11 +22,11 @@ namespace TrustStampCore.Repository
                 return;
 
             string sql = "CREATE TABLE IF NOT EXISTS Proof "+
-                "(id integer primary key," +
-                "hash text,"+
-                "path text," +
-                "partition text," +
-                "timestamp datetime)";
+                "(id INTEGER PRIMARY KEY," +
+                "hash BLOB,"+
+                "path BLOB," +
+                "partition TEXT," +
+                "timestamp DATETIME)";
             var command = new SQLiteCommand(sql, Connection);
             command.ExecuteNonQuery();
 
@@ -50,9 +47,14 @@ namespace TrustStampCore.Repository
 
         public void UpdatePath(JObject proof)
         {
+            UpdatePath((byte[])proof["hash"], (byte[])proof["path"]);
+        }
+
+        public void UpdatePath(byte[] hash, byte[] path)
+        {
             var insertSQL = new SQLiteCommand("UPDATE Proof SET path = @path WHERE hash = @hash", Connection);
-            insertSQL.Parameters.Add(new SQLiteParameter("@hash", proof["hash"]));
-            insertSQL.Parameters.Add(new SQLiteParameter("@path", proof["path"]));
+            insertSQL.Parameters.Add(new SQLiteParameter("@hash", hash));
+            insertSQL.Parameters.Add(new SQLiteParameter("@path", path));
             insertSQL.ExecuteNonQuery();
         }
 

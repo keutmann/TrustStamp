@@ -13,20 +13,6 @@ namespace TrustStampCore.Service
 {
     public class Batch
     {
-        //public string _PartitionKey = null;
-        //public string PartitionKey
-        //{
-        //    get
-        //    {
-        //        return _PartitionKey ?? string.Format("{0}0000", DateTime.Now.ToString("yyyyMMddHH"));
-        //    }
-        //    set
-        //    {
-        //        _PartitionKey = value;
-        //    }
-        //}
-
-
         public static Func<string> PartitionMethod = DefaultPartition;
 
         public static string DefaultPartition()
@@ -87,7 +73,7 @@ namespace TrustStampCore.Service
             Transaction previousTx = null;
             var btc = new BitcoinManager();
 
-            var hash = batchItem["root"].ToString().ToBytes();
+            var hash = (byte[])batchItem["root"];
             var result = btc.Send(hash, previousTx);
             if (result.status == "success")
             {
@@ -116,31 +102,22 @@ namespace TrustStampCore.Service
 
             var proofs = db.Proof.GetByPartition(batchItem["partition"].ToString());
 
-            var leafNodes = new List<TreeEntity>();
-            // Build
-            foreach (JObject proof in proofs)
-            {
-                Console.WriteLine("Hash: Partition {0} - HASH {1}", proof["partition"], proof["hash"]);
-                leafNodes.Add(new TreeEntity(proof));
-            }
+            var leafNodes = from p in proofs 
+                            select new Models.MerkleNode((JObject)p);
 
-            var merkleTree = new MerkleTree();
-            var rootNode = merkleTree.BuildTree(leafNodes);
-            merkleTree.ComputeMerkleTree(rootNode);
+            var merkleTree = new MerkleTree(leafNodes);
+            var rootNode = merkleTree.Build();
 
             // Update the path back to proof entities
-            foreach (var node in leafNodes)
-            {
-                node.Entity["path"] = node.MerkleTree.ToHex();
-                db.Proof.UpdatePath(node.Entity);
-            }
+            foreach (var node in merkleTree.LeafNodes)
+                db.Proof.UpdatePath(node.Hash, node.Path);
 
-            batchItem["root"] = rootNode.Hash.ToHex();
+            batchItem["root"] = rootNode.Hash;
             batchItem["state"] = BatchState.BuildMerkleDone;
 
             db.Batch.Update(batchItem);
 
-            Console.WriteLine(String.Format("Root: {0}", batchItem["root"]));
+            Console.WriteLine(String.Format("Root: {0}", ((byte[])batchItem["root"]).ToHex()));
         }
     }
 }

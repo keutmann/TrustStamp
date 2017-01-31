@@ -19,25 +19,25 @@ namespace TrustStampTests.Core.Services
         public void TestRoot()
         {
             // Setup variables
-            var leafNodes = new List<TreeEntity>();
-            for(var i = 0; i < 11111; i++)
+            var leafNodes = new List<MerkleNode>();
+            for(var i = 0; i < 11; i++)
             {
-                var hash = MerkleTree.HashStrategy(Encoding.Unicode.GetBytes(i.ToString())).ToHex();
+                var hash = MerkleTree.HashStrategy(Encoding.Unicode.GetBytes(i.ToString()));
                 var proof = new JObject(new JProperty("hash", hash));
-                Console.WriteLine("Hash: {0}", proof["hash"]);
-                leafNodes.Add(new TreeEntity(proof));
+                Console.WriteLine("Hash: {0}", ((byte[])proof["hash"]).ToHex());
+                leafNodes.Add(new MerkleNode(proof));
             }
 
             // Build
-            var merkleTree = new MerkleTree();
-            var rootNode = merkleTree.Build(leafNodes);
+            var merkleTree = new MerkleTree(leafNodes);
+            var rootNode = merkleTree.Build();
 
             Console.WriteLine("Root node: " + rootNode.Hash.ToHex());
 
             foreach (var entity in leafNodes)
             {
-                var calcRoot = MerkleTree.ComputeRoot(entity.Hash, entity.MerkleTree, MerkleTree.OuterAlgorithm.HashSize / 8);
-                Console.WriteLine("Entity "+entity.Hash.ToHex() + " : "+entity.MerkleTree.ToHex());
+                var calcRoot = MerkleTree.ComputeRoot(entity.Hash, entity.Path, MerkleTree.HashBytelength);
+                Console.WriteLine("Entity "+entity.Hash.ToHex() + " : "+entity.Path.ToHex());
                 Assert.AreEqual(rootNode.Hash, calcRoot);
             }
         }

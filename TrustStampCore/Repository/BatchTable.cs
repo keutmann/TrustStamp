@@ -25,17 +25,17 @@ namespace TrustStampCore.Repository
 
             string sql = "CREATE TABLE IF NOT EXISTS Batch "+
                 "(" +
-                "partition text PRIMARY KEY," +
-                "root text," +
-                "state text,"+
-                "tx text,"+
-                "lastupdate datetime"+
+                "partition TEXT PRIMARY KEY," +
+                "root BLOB," +
+                "state TEXT,"+
+                "tx TEXT,"+
+                "lastupdate DATETIME"+
                 ")";
             SQLiteCommand command = new SQLiteCommand(sql, Connection);
             command.ExecuteNonQuery();
 
-            //command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS BatchPartition ON Batch (partition)", Connection);
-            //command.ExecuteNonQuery();
+            command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS BatchRoot ON Batch (root)", Connection);
+            command.ExecuteNonQuery();
         }
 
 

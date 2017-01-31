@@ -31,7 +31,7 @@ namespace TrustStampTests.Core.Services
             var p = new Proof();
             var item = p.Add(id);
 
-            Assert.AreEqual(id.ToUpper(), item["hash"].ToString());
+            Assert.AreEqual(id.ToUpper(), ((byte[])item["hash"]).ToHex());
         }
 
         [Test]

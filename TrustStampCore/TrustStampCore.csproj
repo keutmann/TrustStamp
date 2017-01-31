@@ -85,7 +85,7 @@
   <ItemGroup>
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Extensions\Hex.cs" />
-    <Compile Include="Models\TreeEntity.cs" />
+    <Compile Include="Models\MerkleNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\ProofTable.cs" />
     <Compile Include="Repository\BatchTable.cs" />

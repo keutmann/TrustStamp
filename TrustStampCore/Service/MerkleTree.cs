@@ -5,38 +5,36 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using TrustStampCore.Models;
 using TrustStampCore.Extensions;
+using NBitcoin.Crypto;
 
 namespace TrustStampCore.Service
 {
-    public class MerkleTree //: IDisposable
+    public class MerkleTree 
     {
-        public static HashAlgorithm InnerAlgorithm = SHA256.Create();
-        public static HashAlgorithm OuterAlgorithm = RIPEMD160.Create();
-        public static Func<byte[],byte[]> HashStrategy = (i) => OuterAlgorithm.ComputeHash(InnerAlgorithm.ComputeHash(i));
+        public static int HashBytelength = 20;
+        public static Func<byte[],byte[]> HashStrategy = (i) => Hashes.RIPEMD160(Hashes.Hash256(i).ToBytes(),0,32);
 
-        public MerkleTree()
+        public IEnumerable<MerkleNode> LeafNodes { get; }
+
+        public MerkleTree(IEnumerable<MerkleNode> leafNodes)
         {
+            LeafNodes = leafNodes;
         }
 
-        public TreeEntity Build(List<TreeEntity> leafNodes)
+        public MerkleNode Build()
         {
-            var rootNode = BuildTree(leafNodes);
+            var rootNode = BuildTree(LeafNodes);
             ComputeMerkleTree(rootNode);
 
-            // Update the path back to proof entities
-            foreach (var node in leafNodes)
-            {
-                node.Entity["path"] = node.MerkleTree.ToHex();
-            }
             return rootNode;
         }
 
-        public TreeEntity BuildTree(List<TreeEntity> leafNodes)
+        private MerkleNode BuildTree(IEnumerable<MerkleNode> leafNodes)
         {
-            var nodes = new Queue<TreeEntity>(leafNodes);
+            var nodes = new Queue<MerkleNode>(leafNodes);
             while (nodes.Count > 1)
             {
-                var parents = new Queue<TreeEntity>();
+                var parents = new Queue<MerkleNode>();
                 while (nodes.Count > 0)
                 {
                     var first = nodes.Dequeue();
@@ -45,12 +43,12 @@ namespace TrustStampCore.Service
                     if (first.Hash.Compare(second.Hash) > 0)
                     {
                         var hash = HashStrategy(first.Hash.Combine(second.Hash));
-                        parents.Enqueue(new TreeEntity(hash, first, second));
+                        parents.Enqueue(new MerkleNode(hash, first, second));
                     }
                     else
                     {
                         var hash = HashStrategy(second.Hash.Combine(first.Hash));
-                        parents.Enqueue(new TreeEntity(hash, second, first));
+                        parents.Enqueue(new MerkleNode(hash, second, first));
                     }
                 }
                 nodes = parents;
@@ -58,13 +56,13 @@ namespace TrustStampCore.Service
             return nodes.FirstOrDefault(); // root
         }
 
-        public void ComputeMerkleTree(TreeEntity root)
+        private void ComputeMerkleTree(MerkleNode root)
         {
             var merkle = new Stack<byte[]>();
             ComputeMerkleTree(root, merkle);
         }
 
-        public void ComputeMerkleTree(TreeEntity node, Stack<byte[]> merkle)
+        private void ComputeMerkleTree(MerkleNode node, Stack<byte[]> merkle)
         {
             if (node == null)
                 return;
@@ -75,7 +73,7 @@ namespace TrustStampCore.Service
                 foreach (var v in merkle)
                     tree.AddRange(v);
 
-                node.MerkleTree = tree.ToArray();
+                node.Path = tree.ToArray();
             }
 
             if (node.Left != null)
