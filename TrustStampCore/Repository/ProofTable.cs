@@ -21,7 +21,7 @@ namespace TrustStampCore.Repository
             if (TableExist())
                 return;
 
-            string sql = "CREATE TABLE IF NOT EXISTS Proof "+
+            var  sql = "CREATE TABLE IF NOT EXISTS Proof "+
                 "(id INTEGER PRIMARY KEY," +
                 "hash BLOB," +
                 "path BLOB," +
@@ -32,6 +32,10 @@ namespace TrustStampCore.Repository
 
             command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS ProofHash ON Proof (hash)", Connection);
             command.ExecuteNonQuery();
+
+            command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS ProofPartition ON Proof (partition)", Connection);
+            command.ExecuteNonQuery();
+
         }
 
 
