@@ -108,7 +108,6 @@
     <Compile Include="Workflows\NewWorkflow.cs" />
     <Compile Include="Workflows\WorkflowBatch.cs" />
     <Compile Include="Workflows\WorkflowEngine.cs" />
-    <Compile Include="Workflows\WorkflowBatchFactory.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
