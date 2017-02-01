@@ -49,10 +49,10 @@ namespace TrustStampCore.Service
             return null;
         }
 
-        public JArray UnprocessedPartitions()
-        {
-            return DB.Proof.GetUnprocessed();
-        }
+        //public JArray UnprocessedPartitions()
+        //{
+        //    return DB.Proof.GetUnprocessed();
+        //}
 
 
 

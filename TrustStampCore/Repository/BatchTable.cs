@@ -29,7 +29,7 @@ namespace TrustStampCore.Repository
                 "root BLOB," +
                 "state TEXT,"+
                 "tx TEXT,"+
-                "lastupdate DATETIME"+
+                "active INTEGER" +
                 ")";
             SQLiteCommand command = new SQLiteCommand(sql, Connection);
             command.ExecuteNonQuery();
@@ -41,23 +41,23 @@ namespace TrustStampCore.Repository
 
         public void Add(JObject batch)
         {
-            var insertSQL = new SQLiteCommand("INSERT INTO Batch (partition, root, state,tx, lastupdate) VALUES (@partition,@root,@state,@tx,@lastupdate)", Connection);
+            var insertSQL = new SQLiteCommand("INSERT INTO Batch (partition, root, state,tx, active) VALUES (@partition,@root,@state,@tx,@active)", Connection);
             insertSQL.Parameters.Add(new SQLiteParameter("@partition", batch["partition"]));
             insertSQL.Parameters.Add(new SQLiteParameter("@root", batch["root"]));
             insertSQL.Parameters.Add(new SQLiteParameter("@state", batch["state"]));
             insertSQL.Parameters.Add(new SQLiteParameter("@tx", batch["tx"].ToString()));
-            insertSQL.Parameters.Add(new SQLiteParameter("@lastupdate", DateTime.Now));
+            insertSQL.Parameters.Add(new SQLiteParameter("@active", batch["active"]));
             insertSQL.ExecuteNonQuery();
         }
 
         public void Update(JObject batch)
         {
-            var insertSQL = new SQLiteCommand("UPDATE Batch SET root = @root, state = @state, tx = @tx, lastupdate = @lastupdate WHERE partition = @partition", Connection);
+            var insertSQL = new SQLiteCommand("UPDATE Batch SET root = @root, state = @state, tx = @tx, active = @active WHERE partition = @partition", Connection);
             insertSQL.Parameters.Add(new SQLiteParameter("@partition", batch["partition"]));
             insertSQL.Parameters.Add(new SQLiteParameter("@root", batch["root"]));
             insertSQL.Parameters.Add(new SQLiteParameter("@state", batch["state"]));
             insertSQL.Parameters.Add(new SQLiteParameter("@tx", batch["tx"].ToString()));
-            insertSQL.Parameters.Add(new SQLiteParameter("@lastupdate", DateTime.Now));
+            insertSQL.Parameters.Add(new SQLiteParameter("@active", batch["active"]));
             insertSQL.ExecuteNonQuery();
         }
 
@@ -65,6 +65,12 @@ namespace TrustStampCore.Repository
         {
             var command = new SQLiteCommand("DROP TABLE Batch", Connection);
             command.ExecuteNonQuery();
+        }
+
+        public JArray GetActive()
+        {
+            var command = new SQLiteCommand("SELECT * FROM Batch WHERE active = 1 ORDER BY partition DESC", Connection);
+            return Query(command, NewItem);
         }
 
 
@@ -84,8 +90,9 @@ namespace TrustStampCore.Repository
             item = new JObject(
                     new JProperty("partition", partition),
                     new JProperty("root", null),
-                    new JProperty("state", BatchState.New),
-                    new JProperty("tx", new JArray())
+                    new JProperty("state", new JObject()),
+                    new JProperty("tx", new JArray()),
+                    new JProperty("active", 1)
                     );
 
             Add(item);
@@ -106,8 +113,8 @@ namespace TrustStampCore.Repository
                     new JProperty("partition", reader["partition"]),
                     new JProperty("root", reader["root"]),
                     new JProperty("state", reader["state"]),
-                    new JProperty("tx", JArray.Parse(reader["tx"].ToString())),
-                    new JProperty("lastupdate", reader["lastupdate"])
+                    new JProperty("tx", reader["tx"]),
+                    new JProperty("active", reader["active"])
                     );
         }
 

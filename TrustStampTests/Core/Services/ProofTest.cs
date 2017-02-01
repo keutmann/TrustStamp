@@ -26,22 +26,22 @@ namespace TrustStampTests.Core.Services
             }
         }
 
-        [Test]
-        public void TestGetUnprocessed()
-        {
-            using (var proof = Proof.OpenWithDatabase())
-            {
-                int numOfPartitions = 9;
-                // Build Test
-                BuildUnprocessed(proof, numOfPartitions, DateTime.Now);
+        //[Test]
+        //public void TestGetUnprocessed()
+        //{
+        //    using (var proof = Proof.OpenWithDatabase())
+        //    {
+        //        int numOfPartitions = 9;
+        //        // Build Test
+        //        BuildUnprocessed(proof, numOfPartitions, DateTime.Now);
 
-                // Read
-                var partitions = proof.UnprocessedPartitions();
+        //        // Read
+        //        var partitions = proof.UnprocessedPartitions();
 
-                // Test
-                Assert.AreEqual(numOfPartitions, partitions.Count);
-            }
-        }
+        //        // Test
+        //        Assert.AreEqual(numOfPartitions, partitions.Count);
+        //    }
+        //}
 
         [Test]
         public void TestGetHash()

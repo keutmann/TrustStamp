@@ -92,7 +92,6 @@
     <Compile Include="Repository\DBTable.cs" />
     <Compile Include="Repository\TimeStampDatabase.cs" />
     <Compile Include="Service\Batch.cs" />
-    <Compile Include="Service\BatchState.cs" />
     <Compile Include="Service\BitcoinManager.cs" />
     <Compile Include="Service\BusinessDB.cs" />
     <Compile Include="Service\Crypto.cs" />
@@ -102,6 +101,14 @@
     <Compile Include="Controllers\BatchController.cs" />
     <Compile Include="Service\Proof.cs" />
     <Compile Include="Service\TimeMe.cs" />
+    <Compile Include="Workflows\SuccessWorkflow.cs" />
+    <Compile Include="Workflows\MerkleWorkflow.cs" />
+    <Compile Include="Workflows\TimeStampWorkflow.cs" />
+    <Compile Include="Workflows\FailedWorkflow.cs" />
+    <Compile Include="Workflows\NewWorkflow.cs" />
+    <Compile Include="Workflows\WorkflowBatch.cs" />
+    <Compile Include="Workflows\WorkflowEngine.cs" />
+    <Compile Include="Workflows\WorkflowBatchFactory.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

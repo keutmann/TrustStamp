@@ -69,9 +69,17 @@ namespace TrustStampCore.Repository
             return (JObject)Query(command, NewItem).FirstOrDefault();
         }
 
-        public JArray GetUnprocessed()
+        /// <summary>
+        /// Get all batch codes where the proofs has not been build yet. 
+        /// Excluding the currrent batch.
+        /// </summary>
+        /// <param name="batch"></param>
+        /// <returns></returns>
+        public JArray GetUnprocessed(string batch)
         {
-            var command = new SQLiteCommand("SELECT DISTINCT partition FROM Proof WHERE path IS NULL or path ='' ORDER BY partition", Connection);
+            var command = new SQLiteCommand("SELECT DISTINCT partition FROM Proof WHERE (path IS NULL or path ='') and partition != @partition ORDER BY partition", Connection);
+            command.Parameters.Add(new SQLiteParameter("@partition", batch));
+
             return Query(command, (reader) => new JObject(new JProperty("partition", reader["partition"])));
         }
 
