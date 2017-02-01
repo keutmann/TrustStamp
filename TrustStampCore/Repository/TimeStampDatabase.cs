@@ -101,6 +101,7 @@ namespace TrustStampCore.Repository
             else
             {
                 var db = new TimeStampDatabase(DatabaseFilename);
+                db.OpenConnection();
                 return db;
             }
         }

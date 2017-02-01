@@ -7,18 +7,22 @@ using TrustStampCore.Repository;
 
 namespace TrustStampCore.Service
 {
-    public abstract class BusinessDB : IDisposable
+    public abstract class BusinessService : IDisposable 
     {
         public TimeStampDatabase DB = null;
         protected bool LocalDB = false;
 
-        public BusinessDB(TimeStampDatabase db)
+        //public static T Get<T>() where T : BusinessService, new()
+        //{
+        //    T obj = new T();
+        //    obj.DB = TimeStampDatabase.Open();
+        //    obj.LocalDB = true;
+        //    return obj;
+        //}
+
+        public BusinessService(TimeStampDatabase db)
         {
-            LocalDB = (db == null);
-            if (LocalDB)
-                DB = TimeStampDatabase.Open();
-            else
-                DB = db;
+            DB = db;
         }
 
         public void Dispose()

@@ -20,9 +20,11 @@ namespace TrustStampCore.Controllers
         {
             try
             {
-                var batch = new Batch();
-                var item = batch.Get(partition);
-                return Ok(item);
+                using (var batch = Batch.OpenWithDatabase())
+                {
+                    var item = batch.Get(partition);
+                    return Ok(item);
+                }
             }
             catch (Exception ex)
             {

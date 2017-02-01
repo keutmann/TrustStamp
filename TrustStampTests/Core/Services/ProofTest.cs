@@ -18,54 +18,60 @@ namespace TrustStampTests.Core.Services
         public void TestAdd()
         {
             var id = Crypto.GetRandomHash().ConvertToHex();
-            var p = new Proof();
-            var item = p.Add(id);
-            var resultId = ((byte[])item["hash"]).ConvertToHex();
-            Assert.AreEqual(id, resultId);
+            using (var proof = Proof.OpenWithDatabase())
+            {
+                var item = proof.Add(id);
+                var resultId = ((byte[])item["hash"]).ConvertToHex();
+                Assert.AreEqual(id, resultId);
+            }
         }
 
         [Test]
         public void TestGetUnprocessed()
         {
-            var proof = new Proof();
-            int numOfPartitions = 9;
-            // Build Test
-            BuildUnprocessed(proof, numOfPartitions, DateTime.Now);
+            using (var proof = Proof.OpenWithDatabase())
+            {
+                int numOfPartitions = 9;
+                // Build Test
+                BuildUnprocessed(proof, numOfPartitions, DateTime.Now);
 
-            // Read
-            var partitions = proof.UnprocessedPartitions();
+                // Read
+                var partitions = proof.UnprocessedPartitions();
 
-            // Test
-            Assert.AreEqual(numOfPartitions, partitions.Count);
+                // Test
+                Assert.AreEqual(numOfPartitions, partitions.Count);
+            }
         }
 
         [Test]
         public void TestGetHash()
         {
             int count = 10;
-            var proof = new Proof();
-
-            // Build Test
-            var list = new List<byte[]>();
-            using (var db = TimeStampDatabase.Open())
+            using (var proof = Proof.OpenWithDatabase())
             {
-                for (int i = 0; i < count; i++)
-                {
-                    var id = Crypto.GetRandomHash();
-                    list.Add(id);
-                    var item = db.Proof.NewItem(id, null, Batch.GetCurrentPartition(), DateTime.Now);
-                    db.Proof.Add(item);
-                }
 
-                using (TimeMe time = new TimeMe("Seek hash"))
+                // Build Test
+                var list = new List<byte[]>();
+                using (var db = TimeStampDatabase.Open())
                 {
-                    foreach (var id in list)
+                    for (int i = 0; i < count; i++)
                     {
-                        var item = db.Proof.GetByHash(id);
+                        var id = Crypto.GetRandomHash();
+                        list.Add(id);
+                        var item = db.Proof.NewItem(id, null, Batch.GetCurrentPartition(), DateTime.Now);
+                        db.Proof.Add(item);
+                    }
+
+                    using (TimeMe time = new TimeMe("Seek hash"))
+                    {
+                        foreach (var id in list)
+                        {
+                            var item = db.Proof.GetByHash(id);
+                        }
                     }
                 }
+                Assert.IsTrue(true);
             }
-            Assert.IsTrue(true);
         }
 
 

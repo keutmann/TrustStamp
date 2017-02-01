@@ -40,32 +40,34 @@ namespace TrustStampTests.Core.Services
         public void TestProcessBuild()
         {
             // Setup
-            var proof = new Proof();
-            int numOfPartitions = 9;
-            var partitionDate = DateTime.Now;
-            ProofTest.BuildUnprocessed(proof, numOfPartitions, partitionDate);
-
-            // Move partition forward!
-            Batch.PartitionMethod = () => string.Format("{0}000", partitionDate.AddDays(1).ToString("yyyyMMddHH"));
-
-            var batch = new Batch();
-
-            // Reference batchItem
-            var batchItemToProcess = batch.GetNextBatchToProcess();
-            var partition = batchItemToProcess["partition"].ToString();
-
-            batch.Process();
-            var db = batch.DB;
-
-            var proofProcessed = db.Proof.GetByPartition(partition);
-
-            batchItemToProcess = db.Batch.GetByPartition(partition);
-            Console.WriteLine("Bitcoin tx: "+ batchItemToProcess["tx"].ToString());
-
-            foreach (var item in proofProcessed)
+            using (var proof = Proof.OpenWithDatabase())
             {
-                Assert.IsNotEmpty(item["path"]+"");
-                Console.WriteLine("Proof path: "+ item["path"]);
+                int numOfPartitions = 9;
+                var partitionDate = DateTime.Now;
+                ProofTest.BuildUnprocessed(proof, numOfPartitions, partitionDate);
+
+                // Move partition forward!
+                Batch.PartitionMethod = () => string.Format("{0}000", partitionDate.AddDays(1).ToString("yyyyMMddHH"));
+
+                var batch = new Batch(proof.DB);
+
+                // Reference batchItem
+                var batchItemToProcess = batch.GetNextBatchToProcess();
+                var partition = batchItemToProcess["partition"].ToString();
+
+                batch.Process();
+                var db = batch.DB;
+
+                var proofProcessed = db.Proof.GetByPartition(partition);
+
+                batchItemToProcess = db.Batch.GetByPartition(partition);
+                Console.WriteLine("Bitcoin tx: " + batchItemToProcess["tx"].ToString());
+
+                foreach (var item in proofProcessed)
+                {
+                    Assert.IsNotEmpty(item["path"] + "");
+                    Console.WriteLine("Proof path: " + item["path"]);
+                }
             }
         }
 

@@ -21,9 +21,11 @@ namespace TrustStampCore.Controllers
         {
             try
             {
-                var proof = new Proof();
-                var result = proof.Add(id);
-                return Ok(result);
+                using (var proof = Proof.OpenWithDatabase())
+                {
+                    var result = proof.Add(id);
+                    return Ok(result);
+                }
             }
             catch (Exception ex)
             {
@@ -39,13 +41,15 @@ namespace TrustStampCore.Controllers
         {
             try
             {
-                var proof = new Proof();
-                var result = proof.Get(id);
+                using (var proof = Proof.OpenWithDatabase())
+                {
+                    var result = proof.Get(id);
 
-                if (result == null)
-                    return Ok("ID Not found!");
+                    if (result == null)
+                        return Ok("ID Not found!");
 
-                return Ok(result);
+                    return Ok(result);
+                }
             }
             catch (Exception ex)
             {

@@ -11,7 +11,7 @@ using NBitcoin;
 
 namespace TrustStampCore.Service
 {
-    public class Batch : BusinessDB
+    public class Batch : BusinessService
     {
         public static Func<string> PartitionMethod = DefaultPartition;
 
@@ -25,7 +25,14 @@ namespace TrustStampCore.Service
             return PartitionMethod();
         }
 
-        public Batch(TimeStampDatabase db = null) : base(db)
+        public static Batch OpenWithDatabase()
+        {
+            var p = new Batch(TimeStampDatabase.Open());
+            p.LocalDB = true;
+            return p;
+        }
+
+        public Batch(TimeStampDatabase db) : base(db)
         {
         }
 

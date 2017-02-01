@@ -10,10 +10,17 @@ using TrustStampCore.Repository;
 
 namespace TrustStampCore.Service
 {
-    public class Proof : BusinessDB
+    public class Proof : BusinessService
     {
 
-        public Proof(TimeStampDatabase db = null) : base(db)
+        public static Proof OpenWithDatabase()
+        {
+            var p = new Proof(TimeStampDatabase.Open());
+            p.LocalDB = true;
+            return p;
+        }
+
+        public Proof(TimeStampDatabase db) : base(db)
         {
         }
 
