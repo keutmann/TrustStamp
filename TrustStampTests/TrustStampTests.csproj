@@ -77,10 +77,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Repository\DBBatchTableTest.cs" />
+    <Compile Include="Core\Repository\DBProofTableTest.cs" />
     <Compile Include="Core\Services\BatchTest.cs" />
     <Compile Include="Core\Services\MerkleTreeTest.cs" />
     <Compile Include="Core\Services\IdContainerTest.cs" />
     <Compile Include="Core\Services\ProofTest.cs" />
+    <Compile Include="Core\Workflows\WorkflowTest.cs" />
     <Compile Include="Server\ServerTest.cs" />
     <Compile Include="SetupFixture.cs" />
     <Compile Include="StampTest.cs" />

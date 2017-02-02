@@ -46,10 +46,10 @@ namespace TrustStampCore.Workflows
                 else
                     CurrentBatch["state"]["retry"] = ((int)CurrentBatch["state"]["retry"]) + 1;
 
-                if((int)CurrentBatch["state"]["retry"] == 3)
+                if(CurrentBatch["state"].Contains("retry") && (int)CurrentBatch["state"]["retry"] == 3)
                     Push(FailedWorkflow.Name);
 
-                db.Batch.Update(CurrentBatch);
+                db.BatchTable.Update(CurrentBatch);
             }
         }
 
@@ -59,6 +59,12 @@ namespace TrustStampCore.Workflows
             var btc = new BitcoinManager();
 
             var hash = (byte[])CurrentBatch["root"];
+            if (hash.Length == 0)
+            {
+                WriteLog("No root to timestamp!", db);
+                return true;
+            }
+
             var result = btc.Send(hash, previousTx);
             if (result.status == "success")
             {

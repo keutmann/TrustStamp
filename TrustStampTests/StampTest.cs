@@ -15,8 +15,8 @@ namespace TrustStampTests
         {
             using (var db = TimeStampDatabase.Open())
             {
-                db.Proof.DropTable();
-                db.Batch.DropTable();
+                db.ProofTable.DropTable();
+                db.BatchTable.DropTable();
                 db.CreateIfNotExist();
             }
         }

@@ -28,12 +28,12 @@ namespace TrustStampCore.Service
         {
             var idc =  IDContainer.Parse(id);
             
-            var item = DB.Proof.GetByHash(idc.Hash);
+            var item = DB.ProofTable.GetByHash(idc.Hash);
             if (item != null)
                 return item;
 
-            item = DB.Proof.NewItem(idc.Hash, null, Batch.GetCurrentPartition(), DateTime.Now);
-            DB.Proof.Add(item);
+            item = DB.ProofTable.NewItem(idc.Hash, null, Batch.GetCurrentPartition(), DateTime.Now);
+            DB.ProofTable.Add(item);
 
             return item;
         }
@@ -42,7 +42,7 @@ namespace TrustStampCore.Service
         {
             var idc = IDContainer.Parse(id);
             
-            var item = DB.Proof.GetByHash(idc.Hash);
+            var item = DB.ProofTable.GetByHash(idc.Hash);
             if (item != null)
                 return item;
 

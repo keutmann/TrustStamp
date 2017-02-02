@@ -20,21 +20,21 @@ namespace TrustStampCore.Repository
 
         public string Name { get; set; }
 
-        public ProofTable _proof = null;
-        public ProofTable Proof
+        public DBProofTable _proof = null;
+        public DBProofTable ProofTable
         {
             get
             {
-                return _proof ?? (_proof = new ProofTable(Connection));
+                return _proof ?? (_proof = new DBProofTable(Connection));
             }
         }
 
-        public BatchTable _batch = null;
-        public BatchTable Batch
+        public DBBatchTable _batch = null;
+        public DBBatchTable BatchTable
         {
             get
             {
-                return _batch ?? (_batch = new BatchTable(Connection));
+                return _batch ?? (_batch = new DBBatchTable(Connection));
             }
         }
 
@@ -54,8 +54,8 @@ namespace TrustStampCore.Repository
             if (!IsMemoryDatabase && !File.Exists(DatabaseFilename))
                 SQLiteConnection.CreateFile(DatabaseFilename);
 
-            Proof.CreateIfNotExist();
-            Batch.CreateIfNotExist();
+            ProofTable.CreateIfNotExist();
+            BatchTable.CreateIfNotExist();
         }
 
         public SQLiteConnection OpenConnection()

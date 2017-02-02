@@ -18,8 +18,13 @@ namespace TrustStampCore.Service
 
         public static string DefaultPartition()
         {
-            return string.Format("{0}0000", DateTime.Now.ToString("yyyyMMddHH"));
+            return GetPartition(DateTime.Now);
         } 
+
+        public static string GetPartition(DateTime datetime)
+        {
+            return string.Format("{0}0000", datetime.ToString("yyyyMMddHH"));
+        }
 
         public static string GetCurrentPartition()
         {
@@ -39,7 +44,7 @@ namespace TrustStampCore.Service
 
         public JObject Get(string partition)
         {
-            return DB.Batch.GetByPartition(partition);
+            return DB.BatchTable.GetByPartition(partition);
         }
 
         public void Process()
@@ -50,7 +55,7 @@ namespace TrustStampCore.Service
 
         public void ProcessBatchs()
         {
-            var batchs = DB.Batch.GetActive();
+            var batchs = DB.BatchTable.GetActive();
 
             var engine = new WorkflowEngine(batchs);
             engine.Execute();
@@ -59,12 +64,12 @@ namespace TrustStampCore.Service
         public void EnsureNewBatchs()
         {
             var currentPartition = GetCurrentPartition();// current partition snapshot
-            var partitions = DB.Proof.GetUnprocessed(currentPartition); // partitions are ordered!
+            var partitions = DB.ProofTable.GetUnprocessedPartitions(currentPartition); // partitions are ordered!
 
             foreach (var item in partitions)
             {
                 var partition = item["partition"].ToString();
-                DB.Batch.Ensure(partition);
+                DB.BatchTable.Ensure(partition);
             }
         }
 

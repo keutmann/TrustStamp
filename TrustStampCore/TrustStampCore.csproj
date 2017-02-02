@@ -87,8 +87,8 @@
     <Compile Include="Extensions\EncoderExtensions.cs" />
     <Compile Include="Models\MerkleNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repository\ProofTable.cs" />
-    <Compile Include="Repository\BatchTable.cs" />
+    <Compile Include="Repository\DBProofTable.cs" />
+    <Compile Include="Repository\DBBatchTable.cs" />
     <Compile Include="Repository\DBTable.cs" />
     <Compile Include="Repository\TimeStampDatabase.cs" />
     <Compile Include="Service\Batch.cs" />

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace TrustStampCore.Repository
 {
-    public class ProofTable : DBTable
+    public class DBProofTable : DBTable
     {
-        public ProofTable(SQLiteConnection connection, string tableName = "Proof")
+        public DBProofTable(SQLiteConnection connection, string tableName = "Proof")
         {
             Connection = connection;
             TableName = tableName;
@@ -39,27 +39,27 @@ namespace TrustStampCore.Repository
         }
 
 
-        public void Add(JObject proof)
+        public int Add(JObject proof)
         {
-            SQLiteCommand insertSQL = new SQLiteCommand("INSERT INTO Proof (hash, path, partition, timestamp) VALUES (@hash,@path,@partition,@timestamp)", Connection);
-            insertSQL.Parameters.Add(new SQLiteParameter("@hash", proof["hash"]));
-            insertSQL.Parameters.Add(new SQLiteParameter("@path", proof["path"]));
-            insertSQL.Parameters.Add(new SQLiteParameter("@partition", proof["partition"]));
-            insertSQL.Parameters.Add(new SQLiteParameter("@timestamp", (DateTime)proof["timestamp"]));
-            insertSQL.ExecuteNonQuery();
+            var command = new SQLiteCommand("INSERT INTO Proof (hash, path, partition, timestamp) VALUES (@hash,@path,@partition,@timestamp)", Connection);
+            command.Parameters.Add(new SQLiteParameter("@hash", (byte[])proof["hash"]));
+            command.Parameters.Add(new SQLiteParameter("@path", proof["path"].Type == JTokenType.Null ? null : (byte[])proof["path"]));
+            command.Parameters.Add(new SQLiteParameter("@partition", proof["partition"]));
+            command.Parameters.Add(new SQLiteParameter("@timestamp", (DateTime)proof["timestamp"]));
+            return command.ExecuteNonQuery();
         }
 
-        public void UpdatePath(JObject proof)
+        public int UpdatePath(JObject proof)
         {
-            UpdatePath((byte[])proof["hash"], (byte[])proof["path"]);
+            return UpdatePath((byte[])proof["hash"], proof["path"].Type == JTokenType.Null ? null : (byte[])proof["path"]);
         }
 
-        public void UpdatePath(byte[] hash, byte[] path)
+        public int UpdatePath(byte[] hash, byte[] path)
         {
-            var insertSQL = new SQLiteCommand("UPDATE Proof SET path = @path WHERE hash = @hash", Connection);
-            insertSQL.Parameters.Add(new SQLiteParameter("@hash", hash));
-            insertSQL.Parameters.Add(new SQLiteParameter("@path", path));
-            insertSQL.ExecuteNonQuery();
+            var command = new SQLiteCommand("UPDATE Proof SET path = @path WHERE hash = @hash", Connection);
+            command.Parameters.Add(new SQLiteParameter("@hash", hash));
+            command.Parameters.Add(new SQLiteParameter("@path", path));
+            return command.ExecuteNonQuery();
         }
 
         public JObject GetByHash(byte[] hash)
@@ -69,16 +69,23 @@ namespace TrustStampCore.Repository
             return (JObject)Query(command, NewItem).FirstOrDefault();
         }
 
+        public int Count()
+        {
+            var command = new SQLiteCommand("SELECT count(*) FROM Proof", Connection);
+            var result = Query(command, (reader) => new JObject(new JProperty("count", reader[0]))).FirstOrDefault();
+            return (int)result["count"];
+        }
+
         /// <summary>
         /// Get all batch codes where the proofs has not been build yet. 
         /// Excluding the currrent batch.
         /// </summary>
-        /// <param name="batch"></param>
+        /// <param name="excludePartition"></param>
         /// <returns></returns>
-        public JArray GetUnprocessed(string batch)
+        public JArray GetUnprocessedPartitions(string excludePartition)
         {
             var command = new SQLiteCommand("SELECT DISTINCT partition FROM Proof WHERE (path IS NULL or path ='') and partition != @partition ORDER BY partition", Connection);
-            command.Parameters.Add(new SQLiteParameter("@partition", batch));
+            command.Parameters.Add(new SQLiteParameter("@partition", excludePartition));
 
             return Query(command, (reader) => new JObject(new JProperty("partition", reader["partition"])));
         }

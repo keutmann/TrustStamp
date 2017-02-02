@@ -33,7 +33,7 @@ namespace TrustStampCore.Workflows
 
                 Push(MerkleWorkflow.Name);
 
-                db.Batch.Update(CurrentBatch);
+                db.BatchTable.Update(CurrentBatch);
             }
         }
     }

@@ -29,19 +29,19 @@ namespace TrustStampCore.Workflows
         {
             using (var db = TimeStampDatabase.Open())
             {
-                WriteLog("Stated", db);
-                BuildMerkle(db);
-                WriteLog("Finished", db);
+                WriteLog("Started", db);
+                var proofCount = BuildMerkle(db);
+                WriteLog(string.Format("Finished building {0} proofs", proofCount), db);
 
                 Push(TimeStampWorkflow.Name);
 
-                db.Batch.Update(CurrentBatch);
+                db.BatchTable.Update(CurrentBatch);
             }
         }
 
-        private void BuildMerkle(TimeStampDatabase db)
+        private int BuildMerkle(TimeStampDatabase db)
         {
-            var proofs = db.Proof.GetByPartition(CurrentBatch["partition"].ToString());
+            var proofs = db.ProofTable.GetByPartition(CurrentBatch["partition"].ToString());
 
             var leafNodes = from p in proofs
                             select new Models.MerkleNode((JObject)p);
@@ -51,7 +51,9 @@ namespace TrustStampCore.Workflows
 
             // Update the path back to proof entities
             foreach (var node in merkleTree.LeafNodes)
-                db.Proof.UpdatePath(node.Hash, node.Path);
+                db.ProofTable.UpdatePath(node.Hash, node.Path);
+
+            return proofs.Count;
         }
 
     }

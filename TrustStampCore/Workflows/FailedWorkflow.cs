@@ -33,7 +33,7 @@ namespace TrustStampCore.Workflows
                 WriteLog("Workflow has stopped", db);
 
                 CurrentBatch["active"] = 0;
-                db.Batch.Update(CurrentBatch);
+                db.BatchTable.Update(CurrentBatch);
             }
         }
     }

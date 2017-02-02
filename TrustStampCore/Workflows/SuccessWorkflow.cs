@@ -32,7 +32,7 @@ namespace TrustStampCore.Workflows
                 WriteLog("The workflow has finished", db);
 
                 CurrentBatch["active"] = 0;
-                db.Batch.Update(CurrentBatch);
+                db.BatchTable.Update(CurrentBatch);
             }
         }
     }

@@ -30,8 +30,8 @@ namespace TrustStampTests.Core.Services
             var partition = Batch.GetCurrentPartition();
             using (var db = TimeStampDatabase.Open())
             {
-                var batchItem = db.Batch.Ensure(partition);
-                var loadItem = db.Batch.GetByPartition(partition);
+                var batchItem = db.BatchTable.Ensure(partition);
+                var loadItem = db.BatchTable.GetByPartition(partition);
                 Assert.AreEqual(partition, loadItem["partition"].ToString());
             }
         }
