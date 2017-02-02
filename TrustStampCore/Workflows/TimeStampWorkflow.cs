@@ -65,6 +65,18 @@ namespace TrustStampCore.Workflows
                 return true;
             }
 
+            if(TimeStampDatabase.IsMemoryDatabase)
+            {
+                var tx = (JArray)CurrentBatch["tx"];
+                tx.Add(new JObject(
+                    new JProperty("type", "btc-testnet"),
+                    new JProperty("tx", "No transaction (Demo)")
+                    ));
+
+                WriteLog("Success", db);
+                return true;
+            }
+
             var result = btc.Send(hash, previousTx);
             if (result.status == "success")
             {

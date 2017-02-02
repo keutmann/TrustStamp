@@ -69,18 +69,22 @@ namespace TrustStampTests.Core.Services
         public void TestWorkflowEngine()
         {
             var partition = Batch.GetCurrentPartition();
-            JObject batchItem = null;
             JArray batchs = null;
             using (var db = TimeStampDatabase.Open())
             {
-                batchItem = db.BatchTable.AddDefault(partition);
+                DBProofTableTest.BuildUnprocessed(db.ProofTable, 1, DateTime.Now);
+                var batchManager = new Batch(db);
+                batchManager.EnsureNewBatchs();
                 batchs = db.BatchTable.GetActive();
             }
+
 
             var engine = new WorkflowEngine(batchs);
             engine.Execute();
 
-            Console.WriteLine("Log: " + batchs[0]["log"]);
+            Console.WriteLine(batchs[0]);
+            //Console.WriteLine("Log: " + batchs[0]["log"]);
+            //Console.WriteLine("Tx: " + batchs[0]["tx"]);
 
             Assert.AreEqual(1, batchs.Count);
         }

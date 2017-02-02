@@ -122,11 +122,13 @@ namespace TrustStampCore.Repository
                     new JProperty("partition", reader["partition"]),
                     new JProperty("root", reader["root"]),
                     new JProperty("state", reader["state"]),
-                    new JProperty("tx", reader["tx"]),
+                    new JProperty("tx", !string.IsNullOrEmpty((string)reader["tx"]) ? JArray.Parse((string)reader["tx"]) : new JArray()),
                     new JProperty("active", reader["active"]),
                     new JProperty("log", !string.IsNullOrEmpty((string)reader["log"]) ? JArray.Parse((string)reader["log"]) : new JArray())
                     );
         }
+
+        
 
     }
 }

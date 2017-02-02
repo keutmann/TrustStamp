@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TrustStampCore.Repository;
 using TrustStampCore.Service;
+using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Workflows
 {
@@ -30,8 +31,12 @@ namespace TrustStampCore.Workflows
             using (var db = TimeStampDatabase.Open())
             {
                 WriteLog("Started", db);
+                db.BatchTable.Update(CurrentBatch);
+
+                // This may take some time.
                 var proofCount = BuildMerkle(db);
-                WriteLog(string.Format("Finished building {0} proofs", proofCount), db);
+
+                WriteLog(string.Format("Finished building {0} proofs.", proofCount), db);
 
                 Push(TimeStampWorkflow.Name);
 
@@ -48,6 +53,7 @@ namespace TrustStampCore.Workflows
 
             var merkleTree = new MerkleTree(leafNodes);
             var rootNode = merkleTree.Build();
+            CurrentBatch["root"] = rootNode.Hash;
 
             // Update the path back to proof entities
             foreach (var node in merkleTree.LeafNodes)
