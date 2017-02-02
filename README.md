@@ -5,8 +5,8 @@ Full scale server application. Designed to handle large amount of timestamps by 
 
 Provides a web api interface for submitting proofs (hash of document) and status.
 
-The server is a stand alone and run directly as a Console app or Microsoft Windows Service. (Easy install)
-Comes with its own buildin Sqlite database and OWIN web server interface.
+The server is a stand alone and run directly as a Console Application or Microsoft Windows Service (Easy install).
+Comes with its own buildin Sqlite database and OWIN web api server interface.
 
 No need for IIS/SqlServer installed :)
 
