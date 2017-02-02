@@ -5,7 +5,7 @@ Full scale server application. Designed to handle large amount of proofs (hash o
 
 Provides a web api interface for submitting proofs and get status.
 
-The server is a stand alone and run directly as a Console Application or Microsoft Windows Service (Easy install).
+The server is stand alone application. Can run directly as a Console Application or Microsoft Windows Service (Easy install).
 Comes with its own buildin Sqlite database and OWIN web api server interface.
 
 No need for IIS/SqlServer installed :)
