@@ -50,6 +50,8 @@ namespace TrustStampCore.Workflows
         private int BuildMerkle(TimeStampDatabase db)
         {
             var proofs = db.ProofTable.GetByPartition(CurrentBatch["partition"].ToString());
+            if (proofs.Count == 0)
+                return 0;
 
             var leafNodes = (from p in proofs
                             select new Models.MerkleNode((JObject)p)).ToList();

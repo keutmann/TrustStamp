@@ -67,7 +67,7 @@ namespace TrustStampCore.Workflows
 
             if(TimeStampDatabase.IsMemoryDatabase)
             {
-                var tx = (JArray)CurrentBatch["tx"];
+                var tx = (JArray)CurrentBatch["blockchain"];
                 tx.Add(new JObject(
                     new JProperty("type", "btc-testnet"),
                     new JProperty("tx", "No transaction (Demo)")
@@ -82,7 +82,7 @@ namespace TrustStampCore.Workflows
             {
                 // Not working
                 //previousTx = result.Tx; // Save the current tx for later use in the next spent (support for unconfirmed spending!)
-                var tx = (JArray)CurrentBatch["tx"];
+                var tx = (JArray)CurrentBatch["blockchain"];
                 tx.Add(new JObject(
                     new JProperty("type", "btc-testnet"),
                     new JProperty("tx", result.data)

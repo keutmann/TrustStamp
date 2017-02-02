@@ -85,6 +85,7 @@
   <ItemGroup>
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Extensions\EncoderExtensions.cs" />
+    <Compile Include="Extensions\JsonExtensions.cs" />
     <Compile Include="Models\MerkleNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\DBProofTable.cs" />

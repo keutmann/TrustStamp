@@ -62,7 +62,6 @@ namespace TrustStampTests.Core.Services
             Console.WriteLine("Log: " + wf.CurrentBatch["log"]);
 
             Assert.AreEqual(1, wf.Workflows.Count);
-            Assert.AreEqual(TimeStampWorkflow.Name, wf.Workflows.Peek().StateName);
         }
 
         [Test]
@@ -78,11 +77,18 @@ namespace TrustStampTests.Core.Services
                 batchs = db.BatchTable.GetActive();
             }
 
-
             var engine = new WorkflowEngine(batchs);
             engine.Execute();
 
-            Console.WriteLine(batchs[0]);
+            JObject batch = null;
+            using (var manager = Batch.OpenWithDatabase())
+            {
+                batch = manager.DB.BatchTable.GetByPartition((string)batchs[0]["partition"]);
+            }
+
+            Assert.AreEqual(20, ((byte[])batch["root"]).Length);
+
+            Console.WriteLine(batchs[0].CustomRender());
             
             Assert.AreEqual(1, batchs.Count);
         }

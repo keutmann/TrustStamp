@@ -78,7 +78,7 @@ namespace TrustStampServer
 
         public void ProcessTimeStamps()
         {
-            Console.WriteLine(DateTime.Now.ToLocalTime() + " : Processing activated");
+            Console.WriteLine(DateTime.Now.ToLocalTime() + " : Processing...");
             using (var manager = Batch.OpenWithDatabase())
             {
                 manager.Process();

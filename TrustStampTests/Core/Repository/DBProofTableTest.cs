@@ -109,6 +109,9 @@ namespace TrustStampTests.Core.Services
                 var partitionDate = DateTime.Now;
                 BuildUnprocessed(db.ProofTable, numOfPartitions, partitionDate);
 
+                var count = db.ProofTable.Count();
+                Assert.AreEqual(90, count);
+
                 var partitions = db.ProofTable.GetUnprocessedPartitions(Batch.GetPartition(partitionDate.AddDays(1)));
 
                 Assert.AreEqual(numOfPartitions-1, partitions.Count);
@@ -124,7 +127,7 @@ namespace TrustStampTests.Core.Services
                 {
                     var id = Crypto.GetRandomHash();
                     var item = proof.NewItem(id, null, Batch.GetPartition(partitionDate.AddDays(par)), DateTime.Now);
-                    proof.Add(item);
+                    Assert.AreEqual(1, proof.Add(item));
                 }
             }
         }

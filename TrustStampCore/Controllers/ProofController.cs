@@ -1,13 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Web.Http;
 using System.Web.Http.Results;
 using TrustStampCore.Repository;
 using TrustStampCore.Service;
+using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Controllers
 {
@@ -24,7 +20,7 @@ namespace TrustStampCore.Controllers
                 using (var proof = Proof.OpenWithDatabase())
                 {
                     var result = proof.Add(id);
-                    return Ok(result);
+                    return Ok(result.CustomRender());
                 }
             }
             catch (Exception ex)
@@ -48,7 +44,7 @@ namespace TrustStampCore.Controllers
                     if (result == null)
                         return Ok("ID Not found!");
 
-                    return Ok(result);
+                    return Ok(result.CustomRender());
                 }
             }
             catch (Exception ex)
@@ -65,7 +61,7 @@ namespace TrustStampCore.Controllers
                 using (var db = TimeStampDatabase.Open())
                 {
                     var items = db.ProofTable.Select(100);
-                    return Ok(items);
+                    return Ok(items.CustomRender());
                 }
             }
             catch (Exception ex)

@@ -34,5 +34,10 @@ namespace TrustStampCore.Repository
 
             return result;
         }
+
+        public byte[] GetByteArray(JToken token)
+        {
+            return token.Type == JTokenType.Null ? new byte[0] : (byte[])token;
+        }
     }
 }

@@ -37,6 +37,7 @@ namespace TrustStampTests.Core.Repository
             {
                 db.BatchTable.AddDefault(partition);
                 var item = db.BatchTable.GetByPartition(partition);
+                Assert.AreEqual(0, ((byte[])item["root"]).Length);
 
                 Assert.AreEqual(partition, (string)item["partition"]);
             }
@@ -52,11 +53,15 @@ namespace TrustStampTests.Core.Repository
                 var item = db.BatchTable.GetByPartition(partition);
                 Assert.AreEqual(1, (int)item["active"]);
 
+                item["root"] = Crypto.GetRandomHash();
+                Assert.AreEqual(20, ((byte[])item["root"]).Length);
+
                 item["active"] = 0;
                 Assert.AreEqual(1, db.BatchTable.Update(item)); 
 
                 var updatedItem = db.BatchTable.GetByPartition(partition);
 
+                Assert.AreEqual(20, ((byte[])updatedItem["root"]).Length);
                 Assert.AreEqual(0, (int)updatedItem["active"]);
             }
         }

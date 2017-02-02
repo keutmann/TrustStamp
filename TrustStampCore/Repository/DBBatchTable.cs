@@ -1,11 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TrustStampCore.Service;
 
 namespace TrustStampCore.Repository
 {
@@ -28,7 +23,7 @@ namespace TrustStampCore.Repository
                 "partition TEXT PRIMARY KEY," +
                 "root BLOB," +
                 "state TEXT,"+
-                "tx TEXT,"+
+                "blockchain TEXT," +
                 "active INTEGER," +
                 "log TEXT" +
                 ")";
@@ -45,7 +40,7 @@ namespace TrustStampCore.Repository
                 new JProperty("partition", partition),
                 new JProperty("root", null),
                 new JProperty("state", new JObject()),
-                new JProperty("tx", new JArray()),
+                new JProperty("blockchain", new JArray()),
                 new JProperty("active", 1),
                 new JProperty("log", new JArray())
                 );
@@ -57,11 +52,11 @@ namespace TrustStampCore.Repository
 
         public int Add(JObject batch)
         {
-            var command = new SQLiteCommand("INSERT INTO Batch (partition, root, state,tx, active, log) VALUES (@partition,@root,@state,@tx,@active,@log)", Connection);
+            var command = new SQLiteCommand("INSERT INTO Batch (partition, root, state,blockchain, active, log) VALUES (@partition,@root,@state,@blockchain,@active,@log)", Connection);
             command.Parameters.Add(new SQLiteParameter("@partition", batch["partition"]));
-            command.Parameters.Add(new SQLiteParameter("@root", batch["root"]));
+            command.Parameters.Add(new SQLiteParameter("@root", GetByteArray(batch["root"]))); // Need to type cast, or it will chop of bytes!
             command.Parameters.Add(new SQLiteParameter("@state", batch["state"]));
-            command.Parameters.Add(new SQLiteParameter("@tx", batch["tx"].ToString()));
+            command.Parameters.Add(new SQLiteParameter("@blockchain", batch["blockchain"]));
             command.Parameters.Add(new SQLiteParameter("@active", batch["active"]));
             command.Parameters.Add(new SQLiteParameter("@log", batch["log"]));
             return command.ExecuteNonQuery();
@@ -69,11 +64,11 @@ namespace TrustStampCore.Repository
 
         public int Update(JObject batch)
         {
-            var command = new SQLiteCommand("UPDATE Batch SET root = @root, state = @state, tx = @tx, active = @active, log = @log WHERE partition = @partition", Connection);
+            var command = new SQLiteCommand("UPDATE Batch SET root = @root, state = @state, blockchain = @blockchain, active = @active, log = @log WHERE partition = @partition", Connection);
             command.Parameters.Add(new SQLiteParameter("@partition", batch["partition"]));
-            command.Parameters.Add(new SQLiteParameter("@root", batch["root"]));
+            command.Parameters.Add(new SQLiteParameter("@root", GetByteArray(batch["root"]))); // Need to type cast, or it will chop of bytes!
             command.Parameters.Add(new SQLiteParameter("@state", batch["state"]));
-            command.Parameters.Add(new SQLiteParameter("@tx", batch["tx"].ToString()));
+            command.Parameters.Add(new SQLiteParameter("@blockchain", batch["blockchain"]));
             command.Parameters.Add(new SQLiteParameter("@active", batch["active"]));
             command.Parameters.Add(new SQLiteParameter("@log", batch["log"]));
             return command.ExecuteNonQuery();
@@ -130,7 +125,7 @@ namespace TrustStampCore.Repository
                     new JProperty("partition", reader["partition"]),
                     new JProperty("root", reader["root"]),
                     new JProperty("state", reader["state"]),
-                    new JProperty("tx", !string.IsNullOrEmpty((string)reader["tx"]) ? JArray.Parse((string)reader["tx"]) : new JArray()),
+                    new JProperty("blockchain", !string.IsNullOrEmpty((string)reader["blockchain"]) ? JArray.Parse((string)reader["blockchain"]) : new JArray()),
                     new JProperty("active", reader["active"]),
                     new JProperty("log", !string.IsNullOrEmpty((string)reader["log"]) ? JArray.Parse((string)reader["log"]) : new JArray())
                     );

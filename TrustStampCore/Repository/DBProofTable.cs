@@ -42,8 +42,8 @@ namespace TrustStampCore.Repository
         public int Add(JObject proof)
         {
             var command = new SQLiteCommand("INSERT INTO Proof (hash, path, partition, timestamp) VALUES (@hash,@path,@partition,@timestamp)", Connection);
-            command.Parameters.Add(new SQLiteParameter("@hash", (byte[])proof["hash"]));
-            command.Parameters.Add(new SQLiteParameter("@path", proof["path"].Type == JTokenType.Null ? null : (byte[])proof["path"]));
+            command.Parameters.Add(new SQLiteParameter("@hash", GetByteArray(proof["hash"])));
+            command.Parameters.Add(new SQLiteParameter("@path", GetByteArray(proof["path"])));
             command.Parameters.Add(new SQLiteParameter("@partition", proof["partition"]));
             command.Parameters.Add(new SQLiteParameter("@timestamp", (DateTime)proof["timestamp"]));
             return command.ExecuteNonQuery();
@@ -58,7 +58,7 @@ namespace TrustStampCore.Repository
 
         public int UpdatePath(JObject proof)
         {
-            return UpdatePath((byte[])proof["hash"], proof["path"].Type == JTokenType.Null ? null : (byte[])proof["path"]);
+            return UpdatePath(GetByteArray(proof["hash"]), GetByteArray(proof["path"]));
         }
 
         public int UpdatePath(byte[] hash, byte[] path)
@@ -91,8 +91,9 @@ namespace TrustStampCore.Repository
         /// <returns></returns>
         public JArray GetUnprocessedPartitions(string excludePartition)
         {
-            var command = new SQLiteCommand("SELECT DISTINCT partition FROM Proof WHERE (path IS NULL or path ='') and partition != @partition ORDER BY partition", Connection);
+            var command = new SQLiteCommand("SELECT DISTINCT partition FROM Proof WHERE (path IS NULL or path = @path) and partition != @partition ORDER BY partition", Connection);
             command.Parameters.Add(new SQLiteParameter("@partition", excludePartition));
+            command.Parameters.Add(new SQLiteParameter("@path", new byte[0]));
 
             return Query(command, (reader) => new JObject(new JProperty("partition", reader["partition"])));
         }
