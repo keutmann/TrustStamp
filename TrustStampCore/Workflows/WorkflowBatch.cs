@@ -29,7 +29,7 @@ namespace TrustStampCore.Workflows
 
         public virtual void WriteLog(string message, TimeStampDatabase db)
         {
-            this.WriteLog(StateName, message, db);
+            WriteLog(StateName, message, db);
         }
 
         public virtual void WriteLog(string source, string message, TimeStampDatabase db)
@@ -40,7 +40,10 @@ namespace TrustStampCore.Workflows
                 new JProperty("Source", source),
                 new JProperty("Message", message)
                 ));
+
+            Console.WriteLine(DateTime.Now.ToShortTimeString()+ ": "+ source + ": " + message);
         }
+
 
         public virtual void SetState()
         {

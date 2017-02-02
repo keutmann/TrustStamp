@@ -23,7 +23,7 @@ namespace TrustStampCore.Service
 
         public static string GetPartition(DateTime datetime)
         {
-            return string.Format("{0}0000", datetime.ToString("yyyyMMddHH"));
+            return string.Format("{0}00", datetime.ToString("yyyyMMddHHmm"));
         }
 
         public static string GetCurrentPartition()
@@ -53,7 +53,7 @@ namespace TrustStampCore.Service
             ProcessBatchs(); // 
         }
 
-        public void ProcessBatchs()
+        protected void ProcessBatchs()
         {
             var batchs = DB.BatchTable.GetActive();
 

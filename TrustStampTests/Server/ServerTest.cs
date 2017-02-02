@@ -36,7 +36,6 @@ namespace TrustStampTests.Core.Services
         }
 
 
-
         //[Test]
         //public void ClientTest()
         //{

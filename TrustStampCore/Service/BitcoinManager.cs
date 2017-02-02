@@ -1,4 +1,5 @@
 ﻿using NBitcoin;
+using NBitcoin.Crypto;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -16,19 +17,19 @@ namespace TrustStampCore.Service
         private Key key32 = null;
         private BitcoinPubKeyAddress adr32 = null;
 
-
         public BitcoinManager()
         {
             var crypt = SHA256.Create();
 
-            key32 = new Key(crypt.ComputeHash(Encoding.Unicode.GetBytes("Carsten Keutmann")), 32, true);
+            key32 = new Key(Hashes.SHA256(Encoding.Unicode.GetBytes("Carsten Keutmann")), 32, true);
             adr32 = key32.PubKey.GetAddress(CurrentNetwork);
         }
 
 
         public BlockrTxPutResult Send(byte[] hash, Transaction sourceTx = null)
         {
-            var keyPoolHash = new Key(hash, 32, true);
+            Key keyPoolHash = (hash.Length == 32) ? new Key(hash, hash.Length, true) :
+                new Key(Hashes.SHA256(hash), 32, true);
 
             var blockr = new BlockrTransactionRepository();
             blockr.Network = CurrentNetwork;

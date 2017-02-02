@@ -96,6 +96,7 @@
     <Compile Include="Service\BusinessDB.cs" />
     <Compile Include="Service\Crypto.cs" />
     <Compile Include="Service\IDContainer.cs" />
+    <Compile Include="Service\BytesToHexConverter.cs" />
     <Compile Include="Service\MerkleTree.cs" />
     <Compile Include="Controllers\ProofController.cs" />
     <Compile Include="Controllers\BatchController.cs" />

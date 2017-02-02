@@ -20,7 +20,7 @@ namespace TrustStampTests.Core.Services
         {
             // Setup variables
             var leafNodes = new List<MerkleNode>();
-            for(var i = 0; i < 11; i++)
+            for(var i = 0; i < 100; i++)
             {
                 var hash = MerkleTree.HashStrategy(Encoding.Unicode.GetBytes(i.ToString()));
                 var proof = new JObject(new JProperty("hash", hash));

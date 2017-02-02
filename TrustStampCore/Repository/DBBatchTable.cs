@@ -93,6 +93,14 @@ namespace TrustStampCore.Repository
             return command.ExecuteNonQuery();
         }
 
+        public JArray Select(int count)
+        {
+            var command = new SQLiteCommand("SELECT * FROM Batch ORDER BY partition DESC LIMIT @count", Connection);
+            command.Parameters.Add(new SQLiteParameter("@count", count));
+            return Query(command, NewItem);
+        }
+
+
         public JArray GetActive()
         {
             var command = new SQLiteCommand("SELECT * FROM Batch WHERE active = 1 ORDER BY partition DESC", Connection);

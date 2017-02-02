@@ -38,7 +38,10 @@ namespace TrustStampCore.Workflows
 
                 WriteLog(string.Format("Finished building {0} proofs.", proofCount), db);
 
-                Push(TimeStampWorkflow.Name);
+                if(proofCount > 0)
+                    Push(TimeStampWorkflow.Name);
+                else
+                    Push(FailedWorkflow.Name);
 
                 db.BatchTable.Update(CurrentBatch);
             }
@@ -48,15 +51,15 @@ namespace TrustStampCore.Workflows
         {
             var proofs = db.ProofTable.GetByPartition(CurrentBatch["partition"].ToString());
 
-            var leafNodes = from p in proofs
-                            select new Models.MerkleNode((JObject)p);
+            var leafNodes = (from p in proofs
+                            select new Models.MerkleNode((JObject)p)).ToList();
 
             var merkleTree = new MerkleTree(leafNodes);
             var rootNode = merkleTree.Build();
             CurrentBatch["root"] = rootNode.Hash;
 
             // Update the path back to proof entities
-            foreach (var node in merkleTree.LeafNodes)
+            foreach (var node in leafNodes)
                 db.ProofTable.UpdatePath(node.Hash, node.Path);
 
             return proofs.Count;

@@ -49,6 +49,13 @@ namespace TrustStampCore.Repository
             return command.ExecuteNonQuery();
         }
 
+        public JArray Select(int count)
+        {
+            var command = new SQLiteCommand("SELECT * FROM Proof ORDER BY partition DESC LIMIT @count", Connection);
+            command.Parameters.Add(new SQLiteParameter("@count", count));
+            return Query(command, NewItem);
+        }
+
         public int UpdatePath(JObject proof)
         {
             return UpdatePath((byte[])proof["hash"], proof["path"].Type == JTokenType.Null ? null : (byte[])proof["path"]);

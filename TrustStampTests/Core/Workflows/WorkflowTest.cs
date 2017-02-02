@@ -83,9 +83,7 @@ namespace TrustStampTests.Core.Services
             engine.Execute();
 
             Console.WriteLine(batchs[0]);
-            //Console.WriteLine("Log: " + batchs[0]["log"]);
-            //Console.WriteLine("Tx: " + batchs[0]["tx"]);
-
+            
             Assert.AreEqual(1, batchs.Count);
         }
     }

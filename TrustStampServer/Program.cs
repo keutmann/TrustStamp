@@ -13,9 +13,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Topshelf;
-using TrustStampCore.Extensions;
 using System.Collections.Specialized;
 using System.Net;
+using Newtonsoft.Json;
 
 namespace TrustStampServer
 {
@@ -47,120 +47,4 @@ namespace TrustStampServer
 
         }
     }
-
-    public class Settings 
-    {
-        public int Port {
-            get
-            {
-                int result;
-                if (int.TryParse(NameValue["port"], out result))
-                    return result;
-                return 9000;
-            }
-            set
-            {
-                NameValue["port"] = value.ToString();
-            }
-        }
-
-        public IPEndPoint EndPoint;
-
-        public NameValueCollection NameValue;
-
-        public Settings(NameValueCollection settings)
-        {
-            NameValue = settings;
-            EndPoint = new IPEndPoint(IPAddress.Loopback, 9000);
-        }
-    }
-
-    public class TrustStampService
-    {
-        private IDisposable _webApp;
-        private bool process = true;
-        private Timer timer;
-        private int timeInMs = 1000;
-        public Settings Config { get; set; }
-
-        public void Start(Settings settings)
-        {
-            var test = EncoderExtensions.ConvertFromHex("AA"); // Just to make Api Controller able to find the BatchController in library assembly, temporary solution
-
-            Config = settings;
-            var url = "http://"+settings.EndPoint.ToString();
-            _webApp = WebApp.Start<StartOwin>(url);
-            RunTimer(ProcessTimeStamps);
-        }
-
-        private void RunTimer(Action method)
-        {
-
-
-            timer = new Timer((o) =>
-            {
-                try
-                {
-                    method();
-                }
-                catch (Exception)
-                {
-                    // handle
-                }
-                finally
-                {
-                    // only set the initial time, do not set the recurring time
-                    timer.Change(timeInMs, Timeout.Infinite);
-                }
-            });
-
-            // only set the initial time, do not set the recurring time
-            timer.Change(timeInMs, Timeout.Infinite);
-        }
-
-        public void ProcessTimeStamps()
-        {
-            Console.WriteLine("Processing: " + DateTime.Now.ToLocalTime());
-            Thread.Sleep(2000);
-            Console.WriteLine("Done working!");
-        }
-
-        public void Pause()
-        {
-            process = false;
-        }
-
-        public void Continue()
-        {
-            process = true;
-        }
-
-        public void Stop()
-        {
-            _webApp.Dispose();
-        }
-    }
-
-    public class StartOwin
-    {
-        public void Configuration(IAppBuilder appBuilder)
-        {
-            var config = new HttpConfiguration();
-            config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-                );
-
-            appBuilder.UseWebApi(config);
-        }
-    }
-
-    //public class HelloController : ApiController
-    //{
-    //    public IHttpActionResult Get()
-    //    {
-    //        return Ok("Hello, World! " + DateTime.Now.ToLocalTime());
-    //    }
-    //}
 }
