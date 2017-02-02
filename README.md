@@ -3,7 +3,7 @@ Timestamp Server based on Bitcoin blockchain.
 
 Full scale server application. Designed to handle large amount of proofs (hash of document) by use of merkle trees.
 
-Provides a web api interface for submitting proofs and status.
+Provides a web api interface for submitting proofs and get status.
 
 The server is a stand alone and run directly as a Console Application or Microsoft Windows Service (Easy install).
 Comes with its own buildin Sqlite database and OWIN web api server interface.
