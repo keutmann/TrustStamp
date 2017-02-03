@@ -92,11 +92,14 @@
     <Compile Include="Repository\DBBatchTable.cs" />
     <Compile Include="Repository\DBTable.cs" />
     <Compile Include="Repository\TimeStampDatabase.cs" />
+    <Compile Include="Service\App.cs" />
     <Compile Include="Service\Batch.cs" />
     <Compile Include="Service\BitcoinManager.cs" />
     <Compile Include="Service\BusinessDB.cs" />
     <Compile Include="Service\BytesToHexConverter.cs" />
     <Compile Include="Service\Crypto.cs" />
+    <Compile Include="Service\ErrorEventLoggerTextWriter.cs" />
+    <Compile Include="Service\EventLoggerTextWriter.cs" />
     <Compile Include="Service\IDContainer.cs" />
     <Compile Include="Service\MerkleTree.cs" />
     <Compile Include="Controllers\ProofController.cs" />

@@ -18,14 +18,12 @@ namespace TrustStampServer
         private IDisposable _webApp;
         private Timer timer;
         private int timeInMs = 1000*60; // 1 minute
-        public Settings Config { get; set; }
 
-        public void Start(Settings settings)
+        public void Start()
         {
             var test = EncoderExtensions.ConvertFromHex("AA"); // Just to make Api Controller able to find the BatchController in library assembly, temporary solution
 
-            Config = settings;
-            var url = "http://" + settings.EndPoint.ToString();
+            var url = "http://" + App.Config["endpoint"] + ":" + App.Config["port"]+ "/";
             _webApp = WebApp.Start<StartOwin>(url);
 
             using (var db = TimeStampDatabase.Open())

@@ -23,5 +23,19 @@ namespace TrustStampCore.Extensions
             serializer.Serialize(sw, token);
             return sb.ToString();
         }
+
+        public static bool ToBoolean(this JToken token, bool defaultValue = false)
+        {
+            if (token == null)
+                return defaultValue;
+
+            if (token.Type == JTokenType.Null)
+                return defaultValue;
+
+            if (token.Type == JTokenType.Boolean)
+                return (bool)token;
+
+            return defaultValue;
+        }
     }
 }

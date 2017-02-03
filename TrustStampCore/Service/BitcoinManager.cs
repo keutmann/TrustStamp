@@ -44,12 +44,12 @@ namespace TrustStampCore.Service
             }
 
             //urceTx.Outputs.
-
             var txBuilder = new TransactionBuilder();
             var tx = txBuilder
                 .AddCoins(coins)
                 .AddKeys(key32)
-                .Send(keyPoolHash.PubKey.GetAddress(CurrentNetwork), "0.0002")
+                .Send(keyPoolHash.PubKey.GetAddress(CurrentNetwork), "0.0002") // Send to Batch address
+                //.Send(key32.PubKey.GetAddress(CurrentNetwork), coins-Money.) // Send back to source
                 .SendFees("0.0001")
                 .SetChange(adr32)
                 .BuildTransaction(true);

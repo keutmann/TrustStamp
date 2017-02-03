@@ -1,21 +1,9 @@
-﻿using Microsoft.Owin.Hosting;
-using Newtonsoft.Json.Linq;
-using Owin;
+﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Data.SQLite;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Configuration;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Web.Http;
 using Topshelf;
-using System.Collections.Specialized;
-using System.Net;
-using Newtonsoft.Json;
+using TrustStampCore.Service;
+using TrustStampCore.Extensions;
 
 namespace TrustStampServer
 {
@@ -26,25 +14,46 @@ namespace TrustStampServer
 
         public static int Main(string[] args)
         {
-            Debug.Listeners.Add(new TextWriterTraceListener(Console.Out));
-
-            var settings = new Settings(ConfigurationManager.AppSettings);
-
-            return (int)HostFactory.Run(configurator =>
+            try
             {
-                configurator.AddCommandLineDefinition("port", f => { settings.NameValue["port"] = f; });
+                return Setup();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return -1;
+            }
+        }
+
+        private static int Setup()
+        {
+            App.LoadConfigFile("config.json");
+            if(App.Config["eventlog"].ToBoolean() == true)
+                App.EnableEventLogger();
+
+            var result = (int)HostFactory.Run(configurator =>
+            {
+                // Setup configuration from commandline 
+                foreach (JProperty property in App.Config.OfType<JProperty>())
+                    switch (property.Value.Type)
+                    {
+                        case JTokenType.String: configurator.AddCommandLineDefinition(property.Name, value => { property.Value = value; }); break;
+                        case JTokenType.Integer: configurator.AddCommandLineDefinition(property.Name, value => { property.Value = int.Parse(value); }); break;
+                        case JTokenType.Boolean: configurator.AddCommandLineDefinition(property.Name, value => { property.Value = bool.Parse(value); }); break;
+                    }
                 configurator.ApplyCommandLine();
 
                 configurator.Service<TrustStampService>(s =>
                 {
                     s.ConstructUsing(() => new TrustStampService());
-                    s.WhenStarted(service => service.Start(settings));
+                    s.WhenStarted(service => service.Start());
                     s.WhenPaused(service => service.Pause());
                     s.WhenContinued(service => service.Continue());
                     s.WhenStopped(service => service.Stop());
                 });
             });
 
+            return result;
         }
     }
 }

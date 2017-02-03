@@ -24,9 +24,10 @@ namespace TrustStampTests.Core.Services
         {
             if (service == null)
             {
-                var settings = new Settings(new NameValueCollection());
+                //App.LoadConfigFile("config.json");
+
                 service = new TrustStampService();
-                service.Start(settings);
+                service.Start();
             }
         }
 
