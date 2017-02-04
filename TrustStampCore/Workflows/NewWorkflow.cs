@@ -10,20 +10,6 @@ namespace TrustStampCore.Workflows
 {
     public class NewWorkflow : WorkflowBatch
     {
-        public const string Name = "New";
-        public override string StateName
-        {
-            get
-            {
-                return Name;
-            }
-        }
-
-        static NewWorkflow()
-        {
-            WorkflowEngine.WorkflowTypes.Add(Name, typeof(NewWorkflow));
-        }
-
         public override void Execute()
         {
 
@@ -31,7 +17,7 @@ namespace TrustStampCore.Workflows
             {
                 WriteLog("Workflow stated", db);
 
-                Push(MerkleWorkflow.Name);
+                Push(new MerkleWorkflow());
 
                 db.BatchTable.Update(CurrentBatch);
             }

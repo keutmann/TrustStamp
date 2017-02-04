@@ -12,20 +12,6 @@ namespace TrustStampCore.Workflows
 {
     public class MerkleWorkflow : WorkflowBatch
     {
-        public const string Name = "Merkle build";
-        public override string StateName
-        {
-            get
-            {
-                return Name;
-            }
-        }
-
-        static MerkleWorkflow()
-        {
-            WorkflowEngine.WorkflowTypes.Add(Name, typeof(MerkleWorkflow));
-        }
-
         public override void Execute()
         {
             using (var db = TimeStampDatabase.Open())
@@ -38,10 +24,10 @@ namespace TrustStampCore.Workflows
 
                 WriteLog(string.Format("Finished building {0} proofs.", proofCount), db);
 
-                if(proofCount > 0)
-                    Push(TimeStampWorkflow.Name);
+                if (proofCount > 0)
+                    Push(new TimeStampWorkflow());
                 else
-                    Push(FailedWorkflow.Name);
+                    Push(new FailedWorkflow());
 
                 db.BatchTable.Update(CurrentBatch);
             }

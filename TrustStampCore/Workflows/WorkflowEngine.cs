@@ -17,13 +17,17 @@ namespace TrustStampCore.Workflows
 
         static WorkflowEngine()
         {
-            var wfBatchType = typeof(WorkflowBatch);
-            var assembly = wfBatchType.Assembly;
-            foreach (var type in assembly.GetTypes())
-            {
-                if(type.IsSubclassOf(wfBatchType))
-                    RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-            }
+            AddWorkflowType(typeof(FailedWorkflow));
+            AddWorkflowType(typeof(MerkleWorkflow));
+            AddWorkflowType(typeof(NewWorkflow));
+            AddWorkflowType(typeof(SuccessWorkflow));
+            AddWorkflowType(typeof(TimeStampWorkflow));
+        }
+
+        private static void AddWorkflowType(Type wfType)
+        {
+            if (!WorkflowTypes.ContainsKey(wfType.Name))
+                WorkflowTypes.Add(wfType.Name, wfType);
         }
 
 
@@ -32,7 +36,7 @@ namespace TrustStampCore.Workflows
             foreach (JObject batch in batchs)
             {
                 // Set to New state if empty!
-                var state = batch["state"].Contains("state") ? (string)batch["state"]["state"] : NewWorkflow.Name;
+                var state = batch["state"].Contains("state") ? (string)batch["state"]["state"] : typeof(NewWorkflow).Name;
                 //if (batch["state"].Contains("state"))
                 //    state = NewWorkflow.Name;
                 

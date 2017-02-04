@@ -15,7 +15,13 @@ namespace TrustStampCore.Workflows
         public JObject CurrentBatch { get; set; }
         public Stack<WorkflowBatch> Workflows { get; set; }
 
-        public abstract string StateName { get; }
+        public virtual string StateName
+        {
+            get
+            {
+                return GetType().Name;
+            }
+        }
 
         public virtual void Execute()
         {
@@ -53,6 +59,14 @@ namespace TrustStampCore.Workflows
         public virtual void Push(string name)
         {
             Workflows.Push(WorkflowEngine.CreateAndSetState(name, CurrentBatch, Workflows));
+        }
+
+        public virtual void Push(WorkflowBatch wf)
+        {
+            wf.CurrentBatch = CurrentBatch;
+            wf.SetState();
+            wf.Workflows = Workflows;
+            Workflows.Push(wf);
         }
 
     }

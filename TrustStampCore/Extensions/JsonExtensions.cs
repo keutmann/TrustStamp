@@ -24,7 +24,7 @@ namespace TrustStampCore.Extensions
             return sb.ToString();
         }
 
-        public static string ToStringOrDefault(this JToken token, string defaultValue = "")
+        public static string ToStringValue(this JToken token, string defaultValue = "")
         {
             if (token == null)
                 return defaultValue;

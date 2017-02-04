@@ -63,14 +63,14 @@ namespace TrustStampCore.Repository
                 return Connection;
             }
 
-            if(!string.IsNullOrEmpty((string)App.Config["dbconnectionstring"]))
+            if(!string.IsNullOrEmpty(App.Config["dbconnectionstring"].ToStringValue()))
             {
-                Connection = new SQLiteConnection((string)App.Config["dbconnectionstring"]);
+                Connection = new SQLiteConnection(App.Config["dbconnectionstring"].ToStringValue());
                 Connection.Open();
                 return Connection;
             }
 
-            var dbFilename = (!string.IsNullOrEmpty((string)App.Config["dbfilename"])) ? (string)App.Config["dbfilename"] : Name;
+            var dbFilename = (!string.IsNullOrEmpty(App.Config["dbfilename"].ToStringValue())) ? App.Config["dbfilename"].ToStringValue() : Name;
             if (!string.IsNullOrEmpty(dbFilename))
             {
                 var sb = new SQLiteConnectionStringBuilder();
@@ -83,8 +83,8 @@ namespace TrustStampCore.Repository
                 sb.JournalMode = (SQLiteJournalModeEnum)dbObject["journalmode"].ToInteger((int)SQLiteJournalModeEnum.Default);
                 sb.Pooling = dbObject["pooling"].ToBoolean(true);
                 sb.ReadOnly = dbObject["readonly"].ToBoolean(false);
-                sb.Add("cache", dbObject["cache"].ToStringOrDefault("shared"));
-                sb.Add("Compress", dbObject["compress"].ToStringOrDefault("False"));
+                sb.Add("cache", dbObject["cache"].ToStringValue("shared"));
+                sb.Add("Compress", dbObject["compress"].ToStringValue("False"));
                 sb.SyncMode = (SynchronizationModes)dbObject["syncmode"].ToInteger((int)SynchronizationModes.Normal);
 
                 //sb.DefaultIsolationLevel = System.Data.IsolationLevel.ReadUncommitted;

@@ -10,21 +10,6 @@ namespace TrustStampCore.Workflows
 {
     public class FailedWorkflow : WorkflowBatch
     {
-        public const string Name = "Faild";
-
-        public override string StateName
-        {
-            get
-            {
-                return Name;
-            }
-        }
-
-        static FailedWorkflow()
-        {
-            WorkflowEngine.WorkflowTypes.Add(Name, typeof(FailedWorkflow));
-        }
-
         public override void Execute()
         {
 

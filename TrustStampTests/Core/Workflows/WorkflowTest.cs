@@ -37,13 +37,13 @@ namespace TrustStampTests.Core.Services
             }
 
 
-            var wf = WorkflowEngine.CreateAndSetState(NewWorkflow.Name, batchItem, new Stack<WorkflowBatch>());
+            var wf = WorkflowEngine.CreateAndSetState(typeof(NewWorkflow).Name, batchItem, new Stack<WorkflowBatch>());
             wf.Execute();
 
             Console.WriteLine("Log: "+wf.CurrentBatch["log"]);
 
             Assert.AreEqual(1, wf.Workflows.Count);
-            Assert.AreEqual(MerkleWorkflow.Name, wf.Workflows.Peek().StateName);
+            Assert.AreEqual(typeof(MerkleWorkflow).Name, wf.Workflows.Peek().StateName);
         }
 
         [Test]
@@ -56,7 +56,7 @@ namespace TrustStampTests.Core.Services
                 batchItem = db.BatchTable.AddDefault(partition);
             }
 
-            var wf = WorkflowEngine.CreateAndSetState(MerkleWorkflow.Name, batchItem, new Stack<WorkflowBatch>());
+            var wf = WorkflowEngine.CreateAndSetState(typeof(MerkleWorkflow).Name, batchItem, new Stack<WorkflowBatch>());
             wf.Execute();
 
             Console.WriteLine("Log: " + wf.CurrentBatch["log"]);

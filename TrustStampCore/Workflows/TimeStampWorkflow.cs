@@ -12,21 +12,6 @@ namespace TrustStampCore.Workflows
 {
     public class TimeStampWorkflow : WorkflowBatch
     {
-        public const string Name = "BTC-Timestamp";
-
-        public override string StateName
-        {
-            get
-            {
-                return Name;
-            }
-        }
-
-        static TimeStampWorkflow()
-        {
-            WorkflowEngine.WorkflowTypes.Add(Name, typeof(TimeStampWorkflow));
-        }
-
         public override void SetState()
         {
             CurrentBatch["state"] = new JObject(
@@ -42,12 +27,12 @@ namespace TrustStampCore.Workflows
                 WriteLog("Stated", db);
 
                 if (TimeStampBatch(db))
-                    Push(SuccessWorkflow.Name);
+                    Push(new SuccessWorkflow());
                 else
                     CurrentBatch["state"]["retry"] = ((int)CurrentBatch["state"]["retry"]) + 1;
 
                 if(CurrentBatch["state"].Contains("retry") && (int)CurrentBatch["state"]["retry"] == 3)
-                    Push(FailedWorkflow.Name);
+                    Push(new FailedWorkflow());
 
                 db.BatchTable.Update(CurrentBatch);
             }
