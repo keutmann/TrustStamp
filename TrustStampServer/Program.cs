@@ -10,8 +10,6 @@ namespace TrustStampServer
 
     public class Program
     {
-        public static string dbfileName = "test.db";
-
         public static int Main(string[] args)
         {
             try
@@ -20,7 +18,7 @@ namespace TrustStampServer
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.Error.WriteLine(ex.Message);
                 return -1;
             }
         }
@@ -30,6 +28,9 @@ namespace TrustStampServer
             App.LoadConfigFile("config.json");
             if(App.Config["eventlog"].ToBoolean() == true)
                 App.EnableEventLogger();
+
+            // Only when we need to create a config file. 
+            //App.SaveConfigFile("config.json");
 
             var result = (int)HostFactory.Run(configurator =>
             {

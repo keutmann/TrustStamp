@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TrustStampCore.Service;
+using TrustStampCore.Extensions;
+
 
 namespace TrustStampCore.Repository
 {
     public class TimeStampDatabase : IDisposable
     {
-        public static string DatabaseFilename = "test.db";
-
         public static string MemoryConnectionString = "Data Source=:memory:;Version=3;";
         public static TimeStampDatabase MemoryDatabase;
         public static bool IsMemoryDatabase { get; set; }
@@ -40,7 +37,6 @@ namespace TrustStampCore.Repository
 
         public TimeStampDatabase()
         {
-            IsMemoryDatabase = true;
         }
 
 
@@ -51,8 +47,8 @@ namespace TrustStampCore.Repository
 
         public void CreateIfNotExist()
         {
-            if (!IsMemoryDatabase && !File.Exists(DatabaseFilename))
-                SQLiteConnection.CreateFile(DatabaseFilename);
+            if (!IsMemoryDatabase && !File.Exists(Connection.FileName))
+                SQLiteConnection.CreateFile(Connection.FileName);
 
             ProofTable.CreateIfNotExist();
             BatchTable.CreateIfNotExist();
@@ -67,24 +63,42 @@ namespace TrustStampCore.Repository
                 return Connection;
             }
 
-            var sb = new SQLiteConnectionStringBuilder();
-            
-            sb.DataSource = Name;
-            sb.Flags = SQLiteConnectionFlags.UseConnectionPool;
-            //tt.JournalMode = SQLiteJournalModeEnum.Default;
-            //tt.NoSharedFlags = false;
-            sb.Pooling = true;
-            sb.ReadOnly = false;
-            sb.Add("cache", "shared");
-            //tt.Add("Compress", "True");
-            //tt.SyncMode = SynchronizationModes.Normal;
-            //tt.DefaultIsolationLevel = System.Data.IsolationLevel.ReadUncommitted;
-            //tt.DefaultDbType = System.Data.DbType.
-            //var dd = new SQLiteConnection(;
+            if(!string.IsNullOrEmpty((string)App.Config["dbconnectionstring"]))
+            {
+                Connection = new SQLiteConnection((string)App.Config["dbconnectionstring"]);
+                Connection.Open();
+                return Connection;
+            }
 
-            Connection = new SQLiteConnection(sb.ConnectionString);
-            Connection.Open();
-            return Connection;
+            var dbFilename = (!string.IsNullOrEmpty((string)App.Config["dbfilename"])) ? (string)App.Config["dbfilename"] : Name;
+            if (!string.IsNullOrEmpty(dbFilename))
+            {
+                var sb = new SQLiteConnectionStringBuilder();
+
+                sb.DataSource = (string)App.Config["dbfilename"];
+                var dbObject = App.Config["database"];
+                sb.Flags = SQLiteConnectionFlags.UseConnectionPool;
+                //tt.NoSharedFlags = false;
+
+                sb.JournalMode = (SQLiteJournalModeEnum)dbObject["journalmode"].ToInteger((int)SQLiteJournalModeEnum.Default);
+                sb.Pooling = dbObject["pooling"].ToBoolean(true);
+                sb.ReadOnly = dbObject["readonly"].ToBoolean(false);
+                sb.Add("cache", dbObject["cache"].ToStringOrDefault("shared"));
+                sb.Add("Compress", dbObject["compress"].ToStringOrDefault("False"));
+                sb.SyncMode = (SynchronizationModes)dbObject["syncmode"].ToInteger((int)SynchronizationModes.Normal);
+
+                //sb.DefaultIsolationLevel = System.Data.IsolationLevel.ReadUncommitted;
+                //tt.DefaultDbType = System.Data.DbType.
+                //var dd = new SQLiteConnection(;
+
+                Connection = new SQLiteConnection(sb.ConnectionString);
+                Connection.Open();
+                return Connection;
+            }
+
+
+
+            throw new ApplicationException("Not database connection found");
         }
 
         public static TimeStampDatabase Open()
@@ -100,7 +114,7 @@ namespace TrustStampCore.Repository
             }
             else
             {
-                var db = new TimeStampDatabase(DatabaseFilename);
+                var db = new TimeStampDatabase();
                 db.OpenConnection();
                 return db;
             }

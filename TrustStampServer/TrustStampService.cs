@@ -18,11 +18,10 @@ namespace TrustStampServer
         private IDisposable _webApp;
         private Timer timer;
         private int timeInMs = 1000*60; // 1 minute
+        private bool process = true;
 
         public void Start()
         {
-            var test = EncoderExtensions.ConvertFromHex("AA"); // Just to make Api Controller able to find the BatchController in library assembly, temporary solution
-
             var url = "http://" + App.Config["endpoint"] + ":" + App.Config["port"]+ "/";
             _webApp = WebApp.Start<StartOwin>(url);
 
@@ -51,22 +50,24 @@ namespace TrustStampServer
 
         private void RunTimer(Action method)
         {
+
             method(); // Start now!
 
             timer = new Timer((o) =>
             {
                 try
                 {
-                    method();
+                    if (process) // Run the job
+                        method();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // handle
+                    Console.Error.WriteLine(ex.Message);
                 }
                 finally
                 {
                     // only set the initial time, do not set the recurring time
-                    timer.Change(timeInMs, Timeout.Infinite);
+                        timer.Change(timeInMs, Timeout.Infinite);
                 }
             });
 
@@ -85,12 +86,12 @@ namespace TrustStampServer
 
         public void Pause()
         {
-            //process = false;
+            process = false;
         }
 
         public void Continue()
         {
-            //process = true;
+            process = true;
         }
 
         public void Stop()

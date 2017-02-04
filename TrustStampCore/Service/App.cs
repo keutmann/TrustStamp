@@ -29,10 +29,30 @@ namespace TrustStampCore.Service
             }
         }
 
+        public static void SaveConfigFile(string filename)
+        {
+            var json = App.Config.ToString();
+            File.WriteAllText(filename, json);
+        }
+
+
         private static void SetupConfig()
         {
+            // Only define first level properties
             Config["endpoint"] = IPAddress.Loopback.ToString();
             Config["port"] = 12700;
+            Config["eventlog"] = !Environment.UserInteractive; // Activate event logger if no console is active.
+
+            Config["dbconnectionstring"] = "";
+            Config["dbfilename"] = "TrustStamp.db";
+            Config["database"] = new JObject();
+
+            // Not need at the moment
+            Config["database"]["pooling"] = true;
+            Config["database"]["cache"] = "shared";
+            Config["database"]["syncmode"] = 0;
+            Config["database"]["journalmode"] = -1;
+
         }
 
     }
