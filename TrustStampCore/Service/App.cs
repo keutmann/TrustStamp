@@ -42,6 +42,7 @@ namespace TrustStampCore.Service
             Config["endpoint"] = IPAddress.Loopback.ToString();
             Config["port"] = 12700;
             Config["eventlog"] = !Environment.UserInteractive; // Activate event logger if no console is active.
+            Config["test"] = false; // General test, no real data is stored!
 
             Config["dbconnectionstring"] = "";
             Config["dbfilename"] = "TrustStamp.db";

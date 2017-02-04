@@ -11,7 +11,9 @@ namespace TrustStampCore.Repository
     {
         public static string MemoryConnectionString = "Data Source=:memory:;Version=3;";
         public static TimeStampDatabase MemoryDatabase;
-        public static bool IsMemoryDatabase { get; set; }
+        public static object lockObject = new object();
+
+        public static volatile bool IsMemoryDatabase = false;
 
         public SQLiteConnection Connection;
 
@@ -103,12 +105,22 @@ namespace TrustStampCore.Repository
 
         public static TimeStampDatabase Open()
         {
+            if (App.Config["test"].ToBoolean())
+                IsMemoryDatabase = true;
+
             if (IsMemoryDatabase)
             {
-                if (MemoryDatabase == null) { 
-                    MemoryDatabase = new TimeStampDatabase();
-                    MemoryDatabase.OpenConnection();
-                    MemoryDatabase.CreateIfNotExist();
+                if (MemoryDatabase == null)
+                {
+                    lock (lockObject)
+                    {
+                        if (MemoryDatabase == null)
+                        {
+                            MemoryDatabase = new TimeStampDatabase();
+                            MemoryDatabase.OpenConnection();
+                            MemoryDatabase.CreateIfNotExist();
+                        }
+                    }
                 }
                 return MemoryDatabase;
             }

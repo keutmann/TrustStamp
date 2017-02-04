@@ -65,5 +65,20 @@ namespace TrustStampCore.Extensions
 
             return defaultValue;
         }
+
+        public static DateTime ToDateTime(this JToken token, DateTime defaultValue)
+        {
+            if (token == null)
+                return defaultValue;
+
+            if (token.Type == JTokenType.Null)
+                return defaultValue;
+
+            if (token.Type == JTokenType.Date)
+                return (DateTime)token;
+
+            return defaultValue;
+        }
+
     }
 }

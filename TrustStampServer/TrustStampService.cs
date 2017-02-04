@@ -18,7 +18,7 @@ namespace TrustStampServer
         private IDisposable _webApp;
         private Timer timer;
         private int timeInMs = 1000*60; // 1 minute
-        private bool process = true;
+        private volatile bool process = true;
 
         public void Start()
         {

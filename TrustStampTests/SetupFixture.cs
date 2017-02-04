@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using TrustStampCore.Repository;
+using TrustStampCore.Service;
 
 namespace TrustStampTests
 {
@@ -12,7 +13,8 @@ namespace TrustStampTests
         public void OneTimeSetUp()
         {
             // Use in memory database
-            TimeStampDatabase.IsMemoryDatabase = true;
+            //TimeStampDatabase.IsMemoryDatabase = true; No need, see App.Config["test"] = true;
+            App.Config["test"] = true; // Run as test, real timestamp not created!
         }
 
         [OneTimeTearDown]

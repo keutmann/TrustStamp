@@ -1,21 +1,18 @@
 ﻿using NBitcoin;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TrustStampCore.Repository;
 using TrustStampCore.Service;
+using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Workflows
 {
-    public class TimeStampWorkflow : WorkflowBatch
+    public class BitcoinWorkflow : WorkflowBatch
     {
         public override void SetState()
         {
             CurrentBatch["state"] = new JObject(
-                new JProperty("state", StateName),
+                new JProperty("state", Name),
                 new JProperty("retry", 0)
                 );
         }
@@ -27,12 +24,18 @@ namespace TrustStampCore.Workflows
                 WriteLog("Stated", db);
 
                 if (TimeStampBatch(db))
+                {
                     Push(new SuccessWorkflow());
+                }
                 else
-                    CurrentBatch["state"]["retry"] = ((int)CurrentBatch["state"]["retry"]) + 1;
+                {
+                    CurrentBatch["state"]["retry"] = CurrentBatch["state"]["retry"].ToInteger() + 1;
 
-                if(CurrentBatch["state"].Contains("retry") && (int)CurrentBatch["state"]["retry"] == 3)
-                    Push(new FailedWorkflow());
+                    if (CurrentBatch["state"]["retry"].ToInteger() == 3)
+                        Push(new FailedWorkflow());
+                    else
+                        Push(new SleepWorkflow(DateTime.Now.AddHours(2), Name));
+                }
 
                 db.BatchTable.Update(CurrentBatch);
             }
@@ -50,7 +53,7 @@ namespace TrustStampCore.Workflows
                 return true;
             }
 
-            if(TimeStampDatabase.IsMemoryDatabase)
+            if(App.Config["test"].ToBoolean())
             {
                 var tx = (JArray)CurrentBatch["blockchain"];
                 tx.Add(new JObject(

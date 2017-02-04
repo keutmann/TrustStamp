@@ -43,7 +43,7 @@ namespace TrustStampTests.Core.Services
             Console.WriteLine("Log: "+wf.CurrentBatch["log"]);
 
             Assert.AreEqual(1, wf.Workflows.Count);
-            Assert.AreEqual(typeof(MerkleWorkflow).Name, wf.Workflows.Peek().StateName);
+            Assert.AreEqual(typeof(MerkleWorkflow).Name, wf.Workflows.Peek().Name);
         }
 
         [Test]

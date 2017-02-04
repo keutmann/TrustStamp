@@ -21,7 +21,8 @@ namespace TrustStampCore.Workflows
             AddWorkflowType(typeof(MerkleWorkflow));
             AddWorkflowType(typeof(NewWorkflow));
             AddWorkflowType(typeof(SuccessWorkflow));
-            AddWorkflowType(typeof(TimeStampWorkflow));
+            AddWorkflowType(typeof(BitcoinWorkflow));
+            AddWorkflowType(typeof(SleepWorkflow));
         }
 
         private static void AddWorkflowType(Type wfType)
@@ -36,18 +37,9 @@ namespace TrustStampCore.Workflows
             foreach (JObject batch in batchs)
             {
                 // Set to New state if empty!
-                var state = batch["state"].Contains("state") ? (string)batch["state"]["state"] : typeof(NewWorkflow).Name;
-                //if (batch["state"].Contains("state"))
-                //    state = NewWorkflow.Name;
-                
-                if (!WorkflowTypes.ContainsKey(state))
-                    continue; // Handle this as an error!!!
+                var name = batch["state"].Contains("state") ? (string)batch["state"]["state"] : typeof(NewWorkflow).Name;
 
-                var workflowType = WorkflowTypes[state];
-
-                var wf = (WorkflowBatch)Activator.CreateInstance(workflowType);
-                wf.CurrentBatch = batch;
-                wf.Workflows = Workflows;
+                var wf = CreateInstance(name, batch, Workflows);
 
                 Workflows.Push(wf);
             }
@@ -61,8 +53,7 @@ namespace TrustStampCore.Workflows
                 wf.Execute();
             }
         }
-
-        public static WorkflowBatch CreateAndSetState(string name, JObject batch, Stack<WorkflowBatch> workflows)
+        public static WorkflowBatch CreateInstance(string name, JObject batch, Stack<WorkflowBatch> workflows)
         {
             if (!WorkflowTypes.ContainsKey(name))
                 return null; // Handle this as an error!!!
@@ -72,6 +63,12 @@ namespace TrustStampCore.Workflows
             var wf = (WorkflowBatch)Activator.CreateInstance(workflowType);
             wf.CurrentBatch = batch;
             wf.Workflows = workflows;
+            return wf;
+        }
+
+        public static WorkflowBatch CreateAndSetState(string name, JObject batch, Stack<WorkflowBatch> workflows)
+        {
+            var wf = CreateInstance(name, batch, workflows);
             wf.SetState();
             return wf;
         }

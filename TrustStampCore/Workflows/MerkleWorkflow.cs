@@ -25,7 +25,7 @@ namespace TrustStampCore.Workflows
                 WriteLog(string.Format("Finished building {0} proofs.", proofCount), db);
 
                 if (proofCount > 0)
-                    Push(new TimeStampWorkflow());
+                    Push(new BitcoinWorkflow());
                 else
                     Push(new FailedWorkflow());
 

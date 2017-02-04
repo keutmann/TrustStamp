@@ -15,7 +15,7 @@ namespace TrustStampCore.Workflows
         public JObject CurrentBatch { get; set; }
         public Stack<WorkflowBatch> Workflows { get; set; }
 
-        public virtual string StateName
+        public virtual string Name
         {
             get
             {
@@ -35,7 +35,7 @@ namespace TrustStampCore.Workflows
 
         public virtual void WriteLog(string message, TimeStampDatabase db)
         {
-            WriteLog(StateName, message, db);
+            WriteLog(Name, message, db);
         }
 
         public virtual void WriteLog(string source, string message, TimeStampDatabase db)
@@ -53,12 +53,12 @@ namespace TrustStampCore.Workflows
 
         public virtual void SetState()
         {
-            CurrentBatch["state"] = new JObject(new JProperty("state", StateName));
+            CurrentBatch["state"] = new JObject(new JProperty("state", Name));
         }
 
         public virtual void Push(string name)
         {
-            Workflows.Push(WorkflowEngine.CreateAndSetState(name, CurrentBatch, Workflows));
+            Push((WorkflowBatch)Activator.CreateInstance(WorkflowEngine.WorkflowTypes[name]));
         }
 
         public virtual void Push(WorkflowBatch wf)
