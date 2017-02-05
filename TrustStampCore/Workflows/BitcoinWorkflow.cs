@@ -65,6 +65,12 @@ namespace TrustStampCore.Workflows
                 return true;
             }
 
+            if(btc.NoKey)
+            {
+                WriteLog("No wif key - no timestamp!", db);
+                return false;
+            }
+
             var result = btc.Send(hash, previousTx);
             if (result.status == "success")
             {

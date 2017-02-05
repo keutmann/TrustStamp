@@ -21,7 +21,7 @@ namespace ClientDemo
                 {
                     var id = Crypto.GetRandomHash().ConvertToHex();
                     var url = "http://127.0.0.1:12700/api/proof/" + id;
-                    Console.WriteLine("Adding proof: "+ id);
+                    Console.WriteLine("Adding proof: " + id);
                     client.UploadString(url, id);
                 }
                 Console.WriteLine("Added " + count + " proofs!");

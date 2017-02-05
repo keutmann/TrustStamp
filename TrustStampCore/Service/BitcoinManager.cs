@@ -7,22 +7,40 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Service
 {
     public class BitcoinManager
     {
-        public Network CurrentNetwork = Network.TestNet;
+        public Network CurrentNetwork = Network.Main;
 
-        private Key key32 = null;
-        private BitcoinPubKeyAddress adr32 = null;
+        public string WIF { get; }
+        public Key Key32 { get; }
+        public BitcoinPubKeyAddress Adr32 { get; }
+        public bool NoKey { get; }
 
         public BitcoinManager()
         {
-            var crypt = SHA256.Create();
+            if (!string.IsNullOrEmpty(App.Config["btcwif"].ToStringValue()))
+            {
+                CurrentNetwork = Network.Main;
+                WIF = App.Config["btcwif"].ToStringValue();
+            }
+            else if (!string.IsNullOrEmpty(App.Config["btctestwif"].ToStringValue()))
+            {
+                CurrentNetwork = Network.TestNet;
+                WIF = App.Config["btctestwif"].ToStringValue();
+            }
+            else
+            {
+                NoKey = true;
+                return;
+            }
 
-            key32 = new Key(Hashes.SHA256(Encoding.Unicode.GetBytes("Carsten Keutmann")), 32, true);
-            adr32 = key32.PubKey.GetAddress(CurrentNetwork);
+            var secret = new BitcoinSecret(WIF);
+            Key32 = secret.PrivateKey;
+            Adr32 = Key32.PubKey.GetAddress(CurrentNetwork);
         }
 
 
@@ -38,7 +56,7 @@ namespace TrustStampCore.Service
                 coins = sourceTx.Outputs.AsCoins(); // Load unspent coins from previous tx, made by this application.
             else {
                 // Load from main source
-                var unspent = blockr.GetUnspentAsync(key32.PubKey.GetAddress(CurrentNetwork).ToString());
+                var unspent = blockr.GetUnspentAsync(Key32.PubKey.GetAddress(CurrentNetwork).ToString());
                 unspent.Wait();
                 coins = unspent.Result;
             }
@@ -47,11 +65,11 @@ namespace TrustStampCore.Service
             var txBuilder = new TransactionBuilder();
             var tx = txBuilder
                 .AddCoins(coins)
-                .AddKeys(key32)
+                .AddKeys(Key32)
                 .Send(keyPoolHash.PubKey.GetAddress(CurrentNetwork), "0.0002") // Send to Batch address
                 //.Send(key32.PubKey.GetAddress(CurrentNetwork), coins-Money.) // Send back to source
                 .SendFees("0.0001")
-                .SetChange(adr32)
+                .SetChange(Adr32)
                 .BuildTransaction(true);
 
             Console.WriteLine("Verify: " + txBuilder.Verify(tx));
@@ -64,7 +82,7 @@ namespace TrustStampCore.Service
             var txNota = txPoolBuilder
                 .AddCoins(tx.Outputs.AsCoins())
                 .AddKeys(keyPoolHash)
-                .Send(adr32, "0.0001")
+                .Send(Adr32, "0.0001")
                 .SendFees("0.0001")
                 .BuildTransaction(false);
 

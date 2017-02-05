@@ -30,6 +30,8 @@ namespace TrustStampServer
                 db.CreateIfNotExist();
             }
 
+            timeInMs = App.Config["processinterval"].ToInteger(timeInMs);
+
             RunTimer(ProcessTimeStamps);
         }
 

@@ -38,17 +38,20 @@ namespace TrustStampCore.Service
 
         private static void SetupConfig()
         {
-            // Only define first level properties
             Config["endpoint"] = IPAddress.Loopback.ToString();
             Config["port"] = 12700;
             Config["eventlog"] = !Environment.UserInteractive; // Activate event logger if no console is active.
-            Config["test"] = false; // General test, no real data is stored!
+            Config["test"] = false; // General test, no real data is stored, run in memory database!
+            Config["partition"] = "yyyyMMddhh0000"; // Create a new batch every hour.
+            Config["processinterval"] = 1000 * 60; // 1 minute
 
-            Config["dbconnectionstring"] = "";
+            // Bitcoin
+            Config["btcwif"] = "";  // Bitcoin Private key in wif format
+            Config["btctestwif"] = "cMcGZkth7ufvQC59NSTSCTpepSxXbig9JfhCYJtn9RppU4DXx4cy"; // Test net key
+
+            Config["dbconnectionstring"] = "";  // Connection or dbfilename
             Config["dbfilename"] = "TrustStamp.db";
             Config["database"] = new JObject();
-
-            // Not need at the moment
             Config["database"]["pooling"] = true;
             Config["database"]["cache"] = "shared";
             Config["database"]["syncmode"] = 0;

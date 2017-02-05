@@ -1,14 +1,9 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TrustStampCore.Repository;
-using TrustStampCore.Extensions;
-using TrustStampCore.Models;
-using NBitcoin;
 using TrustStampCore.Workflows;
+using TrustStampCore.Extensions;
+
 
 namespace TrustStampCore.Service
 {
@@ -23,7 +18,7 @@ namespace TrustStampCore.Service
 
         public static string GetPartition(DateTime datetime)
         {
-            return string.Format("{0}00", datetime.ToString("yyyyMMddHHmm"));
+            return datetime.ToString( App.Config["partition"].ToStringValue("yyyyMMddhh0000"));
         }
 
         public static string GetCurrentPartition()

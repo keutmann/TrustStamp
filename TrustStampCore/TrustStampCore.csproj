@@ -83,7 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\StatusController.cs" />
+    <Compile Include="Controllers\InfoController.cs" />
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Extensions\EncoderExtensions.cs" />
     <Compile Include="Extensions\JsonExtensions.cs" />
