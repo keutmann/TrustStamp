@@ -1,5 +1,6 @@
 ﻿using NBitcoin;
 using NBitcoin.Crypto;
+using NBitcoin.Policy;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -22,21 +23,18 @@ namespace TrustStampCore.Service
 
         public BitcoinManager()
         {
-            if (!string.IsNullOrEmpty(App.Config["btcwif"].ToStringValue()))
-            {
-                CurrentNetwork = Network.Main;
-                WIF = App.Config["btcwif"].ToStringValue();
-            }
-            else if (!string.IsNullOrEmpty(App.Config["btctestwif"].ToStringValue()))
-            {
-                CurrentNetwork = Network.TestNet;
-                WIF = App.Config["btctestwif"].ToStringValue();
-            }
-            else
+            WIF = App.Config["btcwif"].ToStringValue();
+            if(string.IsNullOrEmpty(WIF))
             {
                 NoKey = true;
                 return;
             }
+
+            if (Network.Main.Name.Equals(App.Config["btcnetwork"].ToStringValue(""), StringComparison.OrdinalIgnoreCase))
+                CurrentNetwork = Network.Main;
+            else
+                CurrentNetwork = Network.TestNet;
+
 
             var secret = new BitcoinSecret(WIF);
             Key32 = secret.PrivateKey;
@@ -86,7 +84,7 @@ namespace TrustStampCore.Service
                 .SendFees("0.0001")
                 .BuildTransaction(false);
 
-            var message = Encoding.UTF8.GetBytes("NOTA5").Concat(hash).ToArray();
+            var message = Encoding.UTF8.GetBytes("trust").Concat(hash).ToArray();
             txNota.Outputs.Add(new TxOut()
             {
                 Value = Money.Zero,

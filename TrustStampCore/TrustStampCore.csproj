@@ -102,6 +102,7 @@
     <Compile Include="Service\ErrorEventLoggerTextWriter.cs" />
     <Compile Include="Service\EventLoggerTextWriter.cs" />
     <Compile Include="Service\IDContainer.cs" />
+    <Compile Include="Service\Info.cs" />
     <Compile Include="Service\MerkleTree.cs" />
     <Compile Include="Controllers\ProofController.cs" />
     <Compile Include="Controllers\BatchController.cs" />

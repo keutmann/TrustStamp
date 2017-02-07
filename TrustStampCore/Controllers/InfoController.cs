@@ -20,17 +20,8 @@ namespace TrustStampCore.Controllers
             {
                 using (var db = TimeStampDatabase.Open())
                 {
-                    var status = new JObject();
-                    status["Proof"] = db.ProofTable.Count();
-                    status["Batch"] = db.BatchTable.Count();
-
-                    var btc = new BitcoinManager();
-                    status["blockchain"] = new JObject();
-                    status["blockchain"]["btc"] = new JObject();
-                    status["blockchain"]["btc"]["network"] = btc.CurrentNetwork.Name;
-                    status["blockchain"]["btc"]["address"] = btc.Adr32.ToWif();
-
-                    return Ok(status);
+                    var info = new Info(db);
+                    return Ok(info.Status());
                 }
             }
             catch (Exception ex)

@@ -46,8 +46,9 @@ namespace TrustStampCore.Service
             Config["processinterval"] = 1000 * 60; // 1 minute
 
             // Bitcoin
-            Config["btcwif"] = "";  // Bitcoin Private key in wif format
-            Config["btctestwif"] = "cMcGZkth7ufvQC59NSTSCTpepSxXbig9JfhCYJtn9RppU4DXx4cy"; // Test net key
+            Config["btcnetwork"] = "TestNet";  // Bitcoin Private key in wif format
+            Config["btcwif"] = "cMcGZkth7ufvQC59NSTSCTpepSxXbig9JfhCYJtn9RppU4DXx4cy"; // Test net key
+            Config["btcfee"] = "0.0001";
 
             Config["dbconnectionstring"] = "";  // Connection or dbfilename
             Config["dbfilename"] = "TrustStamp.db";
