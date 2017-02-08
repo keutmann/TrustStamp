@@ -9,7 +9,7 @@ namespace TrustStampCore.Workflows
         public override void Execute()
         {
 
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var remoteEndpoint = App.Config["remoteEndpoint"].ToStringValue().Trim();
                 if (!VerifyEndpoint(remoteEndpoint)) // No WIF key, then try to stamp remotely

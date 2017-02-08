@@ -6,14 +6,14 @@ namespace TrustStampCore.Service
 {
     public class Info: BusinessService
     {
-        public Info(TimeStampDatabase db) : base(db)
+        public Info(TrustStampDatabase db) : base(db)
         {
         }
 
 
         public static Info OpenWithDatabase()
         {
-            var p = new Info(TimeStampDatabase.Open());
+            var p = new Info(TrustStampDatabase.Open());
             p.LocalDB = true;
             return p;
         }

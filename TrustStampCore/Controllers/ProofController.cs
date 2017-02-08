@@ -58,7 +58,7 @@ namespace TrustStampCore.Controllers
         {
             try
             {
-                using (var db = TimeStampDatabase.Open())
+                using (var db = TrustStampDatabase.Open())
                 {
                     var items = db.ProofTable.Select(100);
                     return Ok(items.CustomRender());
@@ -69,23 +69,6 @@ namespace TrustStampCore.Controllers
                 return new ExceptionResult(ex, this);
             }
         }
-
-
-        //[HttpGet]
-        //public IHttpActionResult GetCount()
-        //{
-        //    try
-        //    {
-        //        using (var db = TimeStampDatabase.Open())
-        //        {
-        //            return Ok(db.BatchTable.Count());
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new ExceptionResult(ex, this);
-        //    }
-        //}
     }
 }
 

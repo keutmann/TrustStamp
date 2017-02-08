@@ -14,7 +14,7 @@ namespace TrustStampCore.Workflows
     {
         public override void Execute()
         {
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 WriteLog("Started", db);
                 db.BatchTable.Update(CurrentBatch);
@@ -33,7 +33,7 @@ namespace TrustStampCore.Workflows
             }
         }
 
-        private int BuildMerkle(TimeStampDatabase db)
+        private int BuildMerkle(TrustStampDatabase db)
         {
             var proofs = db.ProofTable.GetByPartition(CurrentBatch["partition"].ToString());
             if (proofs.Count == 0)

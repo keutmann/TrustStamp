@@ -26,7 +26,7 @@ namespace TrustStampCore.Workflows
                 return;
             }
 
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var blockchainRepositoryName = App.Config["blockchainprovider"].ToStringValue("blockr");
                 var blockchainRepository = BlockchainFactory.GetRepository(blockchainRepositoryName, BlockchainFactory.GetBitcoinNetwork());
@@ -54,7 +54,7 @@ namespace TrustStampCore.Workflows
             }
         }
 
-        public bool TimeStampBatch(TimeStampDatabase db, string wif, IBlockchainRepository repository, Network network)
+        public bool TimeStampBatch(TrustStampDatabase db, string wif, IBlockchainRepository repository, Network network)
         {
             var btc = new BitcoinManager(wif, repository, network);
 

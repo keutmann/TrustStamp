@@ -7,10 +7,10 @@ using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Repository
 {
-    public class TimeStampDatabase : IDisposable
+    public class TrustStampDatabase : IDisposable
     {
         public static string MemoryConnectionString = "Data Source=:memory:;Version=3;";
-        public static TimeStampDatabase MemoryDatabase;
+        public static TrustStampDatabase MemoryDatabase;
         public static object lockObject = new object();
 
         public static volatile bool IsMemoryDatabase = false;
@@ -37,12 +37,12 @@ namespace TrustStampCore.Repository
             }
         }
 
-        public TimeStampDatabase()
+        public TrustStampDatabase()
         {
         }
 
 
-        public TimeStampDatabase(string name)
+        public TrustStampDatabase(string name)
         {
             Name = name;
         }
@@ -103,7 +103,7 @@ namespace TrustStampCore.Repository
             throw new ApplicationException("Not database connection found");
         }
 
-        public static TimeStampDatabase Open()
+        public static TrustStampDatabase Open()
         {
             if (App.Config["test"].ToBoolean())
                 IsMemoryDatabase = true;
@@ -116,7 +116,7 @@ namespace TrustStampCore.Repository
                     {
                         if (MemoryDatabase == null)
                         {
-                            MemoryDatabase = new TimeStampDatabase();
+                            MemoryDatabase = new TrustStampDatabase();
                             MemoryDatabase.OpenConnection();
                             MemoryDatabase.CreateIfNotExist();
                         }
@@ -126,7 +126,7 @@ namespace TrustStampCore.Repository
             }
             else
             {
-                var db = new TimeStampDatabase();
+                var db = new TrustStampDatabase();
                 db.OpenConnection();
                 return db;
             }

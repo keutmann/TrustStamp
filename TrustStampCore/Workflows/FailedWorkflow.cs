@@ -21,7 +21,7 @@ namespace TrustStampCore.Workflows
         public override void Execute()
         {
 
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var msg = "Workflow has stopped";
                 if (!string.IsNullOrEmpty(Message))

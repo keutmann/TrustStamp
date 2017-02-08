@@ -18,7 +18,7 @@ namespace TrustStampTests.Core.Repository
         public void TestAddDefault()
         {
             var partition = Batch.GetCurrentPartition();
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var item = db.BatchTable.AddDefault(partition);
                 Assert.IsNotNull(item);
@@ -33,7 +33,7 @@ namespace TrustStampTests.Core.Repository
         public void TestGetByPartition()
         {
             var partition = Batch.GetCurrentPartition();
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 db.BatchTable.AddDefault(partition);
                 var item = db.BatchTable.GetByPartition(partition);
@@ -47,7 +47,7 @@ namespace TrustStampTests.Core.Repository
         public void TestUpdate()
         {
             var partition = Batch.GetCurrentPartition();
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 db.BatchTable.AddDefault(partition);
                 var item = db.BatchTable.GetByPartition(partition);
@@ -71,7 +71,7 @@ namespace TrustStampTests.Core.Repository
         public void TestEnsure()
         {
             var partition = Batch.GetCurrentPartition();
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var batch = db.BatchTable.Ensure(partition);
                 var item = db.BatchTable.GetByPartition(partition);
@@ -86,7 +86,7 @@ namespace TrustStampTests.Core.Repository
         public void TestGetActive()
         {
             
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var inactiveBatch = db.BatchTable.Ensure(Batch.GetPartition(DateTime.Now));
                 inactiveBatch["active"] = 0;

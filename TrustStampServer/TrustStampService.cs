@@ -25,7 +25,7 @@ namespace TrustStampServer
             var url = "http://" + App.Config["endpoint"] + ":" + App.Config["port"]+ "/";
             _webApp = WebApp.Start<StartOwin>(url);
 
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 db.CreateIfNotExist();
             }

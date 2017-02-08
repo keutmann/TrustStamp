@@ -27,18 +27,18 @@ namespace TrustStampCore.Workflows
         {
         }
 
-        public virtual void UpdateState(JObject state, TimeStampDatabase db)
+        public virtual void UpdateState(JObject state, TrustStampDatabase db)
         {
             CurrentBatch["state"] = state;
             db.BatchTable.Update(CurrentBatch);
         }
 
-        public virtual void WriteLog(string message, TimeStampDatabase db)
+        public virtual void WriteLog(string message, TrustStampDatabase db)
         {
             WriteLog(Name, message, db);
         }
 
-        public virtual void WriteLog(string source, string message, TimeStampDatabase db)
+        public virtual void WriteLog(string source, string message, TrustStampDatabase db)
         {
             var log = (JArray)CurrentBatch["log"];
             log.Add(new JObject(

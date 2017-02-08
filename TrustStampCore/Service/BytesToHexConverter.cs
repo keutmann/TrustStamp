@@ -26,26 +26,5 @@ namespace TrustStampCore.Service
             byte[] arr = (byte[])value;
             writer.WriteValue(arr.ConvertToHex());
         }
-
-        //public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        //{
-        //    if (value == null)
-        //    {
-        //        writer.WriteNull();
-        //        return;
-        //    }
-
-        //    byte[] data = (byte[])value;
-
-        //    // Compose an array.
-        //    writer.WriteStartArray();
-
-        //    for (var i = 0; i < data.Length; i++)
-        //    {
-        //        writer.WriteValue(data[i]);
-        //    }
-
-        //    writer.WriteEndArray();
-        //}
     }
 }

@@ -9,18 +9,10 @@ namespace TrustStampCore.Service
 {
     public abstract class BusinessService : IDisposable 
     {
-        public TimeStampDatabase DB = null;
+        public TrustStampDatabase DB = null;
         protected bool LocalDB = false;
 
-        //public static T Get<T>() where T : BusinessService, new()
-        //{
-        //    T obj = new T();
-        //    obj.DB = TimeStampDatabase.Open();
-        //    obj.LocalDB = true;
-        //    return obj;
-        //}
-
-        public BusinessService(TimeStampDatabase db)
+        public BusinessService(TrustStampDatabase db)
         {
             DB = db;
         }

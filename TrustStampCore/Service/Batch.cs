@@ -28,12 +28,12 @@ namespace TrustStampCore.Service
 
         public static Batch OpenWithDatabase()
         {
-            var p = new Batch(TimeStampDatabase.Open());
+            var p = new Batch(TrustStampDatabase.Open());
             p.LocalDB = true;
             return p;
         }
 
-        public Batch(TimeStampDatabase db) : base(db)
+        public Batch(TrustStampDatabase db) : base(db)
         {
         }
 

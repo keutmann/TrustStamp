@@ -18,7 +18,7 @@ namespace TrustStampCore.Controllers
         {
             try
             {
-                using (var db = TimeStampDatabase.Open())
+                using (var db = TrustStampDatabase.Open())
                 {
                     var info = new Info(db);
                     return Ok(info.Status());

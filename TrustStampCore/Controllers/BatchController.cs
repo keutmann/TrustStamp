@@ -15,7 +15,7 @@ namespace TrustStampCore.Controllers
         {
             try
             {
-                using (var db = TimeStampDatabase.Open())
+                using (var db = TrustStampDatabase.Open())
                 {
                     var items = db.BatchTable.Select(100);
                     return Ok(items.CustomRender());
@@ -48,7 +48,7 @@ namespace TrustStampCore.Controllers
         {
             try
             {
-                using (var db = TimeStampDatabase.Open())
+                using (var db = TrustStampDatabase.Open())
                 {
                     return Ok(db.BatchTable.Count());
                 }

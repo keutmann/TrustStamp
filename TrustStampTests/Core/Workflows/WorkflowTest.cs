@@ -31,7 +31,7 @@ namespace TrustStampTests.Core.Services
         {
             var partition = Batch.GetCurrentPartition();
             JObject batchItem = null;
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 batchItem = db.BatchTable.AddDefault(partition);
             }
@@ -51,7 +51,7 @@ namespace TrustStampTests.Core.Services
         {
             var partition = Batch.GetCurrentPartition();
             JObject batchItem = null;
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 batchItem = db.BatchTable.AddDefault(partition);
             }
@@ -69,7 +69,7 @@ namespace TrustStampTests.Core.Services
         {
             var partition = Batch.GetCurrentPartition();
             JArray batchs = null;
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 DBProofTableTest.BuildUnprocessed(db.ProofTable, 1, DateTime.Now);
                 var batchManager = new Batch(db);

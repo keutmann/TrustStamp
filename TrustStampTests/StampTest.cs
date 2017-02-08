@@ -13,7 +13,7 @@ namespace TrustStampTests
         [SetUp]
         public virtual void Init()
         {
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 db.ProofTable.DropTable();
                 db.BatchTable.DropTable();

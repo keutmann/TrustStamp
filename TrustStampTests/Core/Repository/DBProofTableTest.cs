@@ -20,7 +20,7 @@ namespace TrustStampTests.Core.Services
             var id = Crypto.GetRandomHash();
             var partition = Batch.GetCurrentPartition();
             var timeStamp = DateTime.Now;
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var item = db.ProofTable.NewItem(id, new byte[0], partition, timeStamp);
                 Assert.AreEqual(id, (byte[])item["hash"]);
@@ -37,7 +37,7 @@ namespace TrustStampTests.Core.Services
             var id = Crypto.GetRandomHash();
             var partition = Batch.GetCurrentPartition();
             var timeStamp = DateTime.Now;
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var item = db.ProofTable.NewItem(id, null, partition, timeStamp);
                 Assert.AreEqual(1, db.ProofTable.Add(item));
@@ -50,7 +50,7 @@ namespace TrustStampTests.Core.Services
             var id = Crypto.GetRandomHash();
             var partition = Batch.GetCurrentPartition();
             var timeStamp = DateTime.Now;
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var item = db.ProofTable.NewItem(id, null, partition, timeStamp);
                 Assert.AreEqual(1, db.ProofTable.Add(item));
@@ -66,7 +66,7 @@ namespace TrustStampTests.Core.Services
             var id = Crypto.GetRandomHash();
             var partition = Batch.GetCurrentPartition();
             var timeStamp = DateTime.Now;
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var item = db.ProofTable.NewItem(id, null, partition, timeStamp);
                 Assert.AreEqual(1, db.ProofTable.Add(item));
@@ -83,7 +83,7 @@ namespace TrustStampTests.Core.Services
             var id = Crypto.GetRandomHash();
             var partition = Batch.GetCurrentPartition();
             var timeStamp = DateTime.Now;
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var item = db.ProofTable.NewItem(id, null, partition, timeStamp);
                 Assert.AreEqual(1, db.ProofTable.Add(item));
@@ -103,7 +103,7 @@ namespace TrustStampTests.Core.Services
             var id = Crypto.GetRandomHash();
             var partition = Batch.GetCurrentPartition();
             var timeStamp = DateTime.Now;
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 int numOfPartitions = 9;
                 var partitionDate = DateTime.Now;

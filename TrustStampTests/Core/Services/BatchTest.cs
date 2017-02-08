@@ -28,7 +28,7 @@ namespace TrustStampTests.Core.Services
         public void TestEnsure()
         {
             var partition = Batch.GetCurrentPartition();
-            using (var db = TimeStampDatabase.Open())
+            using (var db = TrustStampDatabase.Open())
             {
                 var batchItem = db.BatchTable.Ensure(partition);
                 var loadItem = db.BatchTable.GetByPartition(partition);

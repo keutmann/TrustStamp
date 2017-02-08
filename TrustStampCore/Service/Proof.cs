@@ -15,12 +15,12 @@ namespace TrustStampCore.Service
 
         public static Proof OpenWithDatabase()
         {
-            var p = new Proof(TimeStampDatabase.Open());
+            var p = new Proof(TrustStampDatabase.Open());
             p.LocalDB = true;
             return p;
         }
 
-        public Proof(TimeStampDatabase db) : base(db)
+        public Proof(TrustStampDatabase db) : base(db)
         {
         }
 

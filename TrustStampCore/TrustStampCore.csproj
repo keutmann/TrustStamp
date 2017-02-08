@@ -96,7 +96,7 @@
     <Compile Include="Repository\DBBatchTable.cs" />
     <Compile Include="Repository\DBTable.cs" />
     <Compile Include="Repository\IBlockchainRepository.cs" />
-    <Compile Include="Repository\TimeStampDatabase.cs" />
+    <Compile Include="Repository\TrustStampDatabase.cs" />
     <Compile Include="Service\App.cs" />
     <Compile Include="Service\Batch.cs" />
     <Compile Include="Service\BitcoinManager.cs" />

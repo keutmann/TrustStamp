@@ -52,7 +52,7 @@ namespace TrustStampTests.Core.Services
 
         //        // Build Test
         //        var list = new List<byte[]>();
-        //        using (var db = TimeStampDatabase.Open())
+        //        using (var db = TrustStampDatabase.Open())
         //        {
         //            for (int i = 0; i < count; i++)
         //            {

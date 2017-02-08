@@ -13,7 +13,6 @@ namespace TrustStampTests
         public void OneTimeSetUp()
         {
             // Use in memory database
-            //TimeStampDatabase.IsMemoryDatabase = true; No need, see App.Config["test"] = true;
             App.Config["test"] = true; // Run as test, real timestamp not created!
         }
 
