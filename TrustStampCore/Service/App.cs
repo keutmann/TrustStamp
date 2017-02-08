@@ -46,7 +46,7 @@ namespace TrustStampCore.Service
             Config["processinterval"] = 1000 * 60; // 1 minute
 
             // Bitcoin
-            Config["btcnetwork"] = "TestNet";  // Bitcoin Private key in wif format
+            Config["network"] = "TestNet";  // Bitcoin Private key in wif format
             Config["btcwif"] = "cMcGZkth7ufvQC59NSTSCTpepSxXbig9JfhCYJtn9RppU4DXx4cy"; // Test net key
             Config["btcfee"] = "0.0001";
 

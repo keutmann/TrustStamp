@@ -1,10 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TrustStampCore.Repository;
+﻿using TrustStampCore.Repository;
 
 namespace TrustStampCore.Workflows
 {
@@ -15,12 +9,13 @@ namespace TrustStampCore.Workflows
 
             using (var db = TimeStampDatabase.Open())
             {
-                WriteLog("Workflow stated", db);
+                WriteLog("Workflow started", db);
 
-                Push(new MerkleWorkflow());
+                //Push(new MerkleWorkflow());
 
                 db.BatchTable.Update(CurrentBatch);
             }
         }
+
     }
 }

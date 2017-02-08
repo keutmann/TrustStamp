@@ -10,12 +10,24 @@ namespace TrustStampCore.Workflows
 {
     public class FailedWorkflow : WorkflowBatch
     {
+        public string Message { get; set; }
+
+        public FailedWorkflow(string message = "")
+        {
+            Message = message;
+        }
+
+
         public override void Execute()
         {
 
             using (var db = TimeStampDatabase.Open())
             {
-                WriteLog("Workflow has stopped", db);
+                var msg = "Workflow has stopped";
+                if (!string.IsNullOrEmpty(Message))
+                    msg = " : " + Message;
+
+                WriteLog(msg, db);
 
                 CurrentBatch["active"] = 0;
                 db.BatchTable.Update(CurrentBatch);

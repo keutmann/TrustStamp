@@ -19,11 +19,24 @@ namespace TrustStampCore.Workflows
 
         public override void Execute()
         {
+            var wif = App.Config["btcwif"].ToStringValue();
+            if (string.IsNullOrEmpty(wif)) // No WIF key, then try to stamp remotely
+            {
+                Push(new RemoteStampWorkflow());
+                return;
+            }
+
             using (var db = TimeStampDatabase.Open())
             {
-                WriteLog("Stated", db);
+                var blockchainRepositoryName = App.Config["blockchainprovider"].ToStringValue("blockr");
+                var blockchainRepository = BlockchainFactory.GetRepository(blockchainRepositoryName, BlockchainFactory.GetBitcoinNetwork());
+                if(blockchainRepository == null)
+                {
+                    WriteLog("No blockchain provider found", db); // No comment!
+                    return;
+                }
 
-                if (TimeStampBatch(db))
+                if (TimeStampBatch(db, wif, blockchainRepository, BlockchainFactory.GetBitcoinNetwork()))
                 {
                     Push(new SuccessWorkflow());
                 }
@@ -32,19 +45,18 @@ namespace TrustStampCore.Workflows
                     CurrentBatch["state"]["retry"] = CurrentBatch["state"]["retry"].ToInteger() + 1;
 
                     if (CurrentBatch["state"]["retry"].ToInteger() == 3)
-                        Push(new FailedWorkflow());
+                        Push(new FailedWorkflow("Failed 3 times creating a blockchain Transaction."));
                     else
-                        Push(new SleepWorkflow(DateTime.Now.AddHours(2), Name));
+                        Push(new SleepWorkflow(DateTime.Now.AddHours(2), Name)); // Sleep to 2 hours and retry this workflow
                 }
 
                 db.BatchTable.Update(CurrentBatch);
             }
         }
 
-        private bool TimeStampBatch(TimeStampDatabase db)
+        public bool TimeStampBatch(TimeStampDatabase db, string wif, IBlockchainRepository repository, Network network)
         {
-            Transaction previousTx = null;
-            var btc = new BitcoinManager();
+            var btc = new BitcoinManager(wif, repository, network);
 
             var hash = (byte[])CurrentBatch["root"];
             if (hash.Length == 0)
@@ -65,29 +77,24 @@ namespace TrustStampCore.Workflows
                 return true;
             }
 
-            if(btc.NoKey)
+            try
             {
-                WriteLog("No wif key - no timestamp!", db);
-                return false;
-            }
+                var txs = btc.Send(hash);
 
-            var result = btc.Send(hash, previousTx);
-            if (result.status == "success")
-            {
-                // Not working
-                //previousTx = result.Tx; // Save the current tx for later use in the next spent (support for unconfirmed spending!)
-                var tx = (JArray)CurrentBatch["blockchain"];
-                tx.Add(new JObject(
+                var blockchainNode = (JArray)CurrentBatch["blockchain"];
+                blockchainNode.Add(new JObject(
                     new JProperty("type", "btc-testnet"),
-                    new JProperty("tx", result.data)
+                    new JProperty("sourcetx", txs.Item1.ToHex()),
+                    new JProperty("batchtx", txs.Item2.ToHex())
                     ));
 
                 WriteLog("Success", db);
                 return true;
+
             }
-            else
+            catch (Exception ex)
             {
-                WriteLog("Failed: " + result.status, db);
+                WriteLog("Failed: " + ex.Message, db);
                 return false;
             }
         }

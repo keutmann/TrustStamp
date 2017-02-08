@@ -1,10 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TrustStampCore.Repository;
+using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Service
 {
@@ -24,20 +20,25 @@ namespace TrustStampCore.Service
 
         public JObject Status()
         {
-            var btc = new BitcoinManager();
 
             var obj = new JObject(
                 new JProperty("proof", DB.ProofTable.Count()),
-                new JProperty("batch", DB.BatchTable.Count()),
-                new JProperty("blockchain", new JObject(
-                    new JProperty("btc", new JObject(
-                        new JProperty("network", btc.CurrentNetwork.Name),
-                        new JProperty("address", btc.Adr32.ToWif())
-                        ))
-                    )));
+                new JProperty("batch", DB.BatchTable.Count()));
 
+            var wif = App.Config["btcwif"].ToStringValue();
+            if (!string.IsNullOrEmpty(wif))
+            {
+                var btc = new BitcoinManager(wif, null, BlockchainFactory.GetBitcoinNetwork());
+                obj.Add(new JProperty("blockchain", new JObject(
+                        new JProperty("btc", new JObject(
+                            new JProperty("network", btc.CurrentNetwork.Name),
+                            new JProperty("address", btc.SourceAddress.ToWif())
+                            ))
+                        )));
+            }
             return obj;
         }
 
     }
 }
+
