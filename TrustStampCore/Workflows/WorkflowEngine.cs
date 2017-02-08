@@ -36,10 +36,8 @@ namespace TrustStampCore.Workflows
         {
             foreach (JObject batch in batchs)
             {
-                // Set to New state if empty!
-                var name = batch["state"].Contains("state") ? (string)batch["state"]["state"] : typeof(NewWorkflow).Name;
 
-                var wf = CreateInstance(name, batch, Workflows);
+                var wf = CreateInstance(batch, Workflows);
 
                 Workflows.Push(wf);
             }
@@ -53,6 +51,15 @@ namespace TrustStampCore.Workflows
                 wf.Execute();
             }
         }
+
+        public static WorkflowBatch CreateInstance(JObject batch, Stack<WorkflowBatch> workflows)
+        {
+            // Set to New state if empty!
+            var name = batch["state"].Contains("state") ? (string)batch["state"]["state"] : typeof(NewWorkflow).Name;
+
+            return CreateInstance(name, batch, workflows);
+        }
+
         public static WorkflowBatch CreateInstance(string name, JObject batch, Stack<WorkflowBatch> workflows)
         {
             if (!WorkflowTypes.ContainsKey(name))

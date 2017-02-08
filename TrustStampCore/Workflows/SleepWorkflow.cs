@@ -10,7 +10,7 @@ namespace TrustStampCore.Workflows
 
         protected DateTime DateTimeOfInstance;
         protected DateTime TimeoutDate;
-        protected string NextWorkflow;
+        protected JToken NextWorkflowState;
 
         public SleepWorkflow()
         {
@@ -18,10 +18,10 @@ namespace TrustStampCore.Workflows
             TimeoutDate = DateTimeOfInstance;
         }
 
-        public SleepWorkflow(DateTime timeoutDate, string nextWorkflow) : this()
+        public SleepWorkflow(DateTime timeoutDate, JToken nextWorkflowstate) : this()
         {
             TimeoutDate = timeoutDate;
-            NextWorkflow = nextWorkflow;
+            NextWorkflowState = nextWorkflowstate;
         }
 
         public override void Execute()
@@ -36,11 +36,11 @@ namespace TrustStampCore.Workflows
                 if (DateTimeOfInstance < timeOutDate)
                     return; // Not ready yet!
 
-                var nextWorkflowName = CurrentBatch["state"]["nextworkflow"].ToStringValue("");
-                if (String.IsNullOrEmpty(nextWorkflowName))
-                    return; // No workflow specified for handling of the next step.
+                var nextWorkflowState = (JObject)CurrentBatch["state"]["nextworkflowstate"];
+                var nextWorkflowName = (string)nextWorkflowState["state"];
 
-                Push(nextWorkflowName);
+                var wf = WorkflowEngine.CreateInstance(nextWorkflowName, CurrentBatch, Workflows);
+                Push(wf);
 
                 db.BatchTable.Update(CurrentBatch);
             }
@@ -51,10 +51,11 @@ namespace TrustStampCore.Workflows
             CurrentBatch["state"] = new JObject(
                 new JProperty("state", Name),
                 new JProperty("timeout", TimeoutDate),
-                new JProperty("nextworkflow", NextWorkflow)
+                new JProperty("nextworkflowstate", NextWorkflowState)
                 );
 
         }
     }
 }
+
 

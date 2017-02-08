@@ -66,7 +66,7 @@ namespace TrustStampCore.Service
             return Tuple.Create(sourceTx, txNota);
         }
 
-        public Key GetKey(byte[] data)
+        public static Key GetKey(byte[] data)
         {
             Key key = (data.Length == 32) ? new Key(data, data.Length, true) :
                 new Key(Hashes.SHA256(data), 32, true);

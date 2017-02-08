@@ -61,6 +61,13 @@ namespace TrustStampCore.Workflows
             Push((WorkflowBatch)Activator.CreateInstance(WorkflowEngine.WorkflowTypes[name]));
         }
 
+        public virtual void Push(JObject batch)
+        {
+            var wf = WorkflowEngine.CreateInstance(batch, Workflows);
+            Push(wf);
+        }
+
+
         public virtual void Push(WorkflowBatch wf)
         {
             wf.CurrentBatch = CurrentBatch;

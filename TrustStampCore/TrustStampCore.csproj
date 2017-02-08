@@ -112,6 +112,8 @@
     <Compile Include="Controllers\BatchController.cs" />
     <Compile Include="Service\Proof.cs" />
     <Compile Include="Service\TimeMe.cs" />
+    <Compile Include="Workflows\BlockchainWorkflowBatch.cs" />
+    <Compile Include="Workflows\RemotePayWorkflow.cs" />
     <Compile Include="Workflows\RemoteStampWorkflow.cs" />
     <Compile Include="Workflows\SleepWorkflow.cs" />
     <Compile Include="Workflows\SuccessWorkflow.cs" />
