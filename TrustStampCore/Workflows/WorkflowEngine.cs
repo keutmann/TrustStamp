@@ -65,7 +65,7 @@ namespace TrustStampCore.Workflows
             // Set to New state if empty!
             var name = batch["state"].EnsureProperty("name", typeof(NewWorkflow).Name);
 
-            return CreateInstance(name.Value.ToStringValue(), batch, workflows);
+            return CreateInstance((string)name.Value, batch, workflows);
         }
 
         public static WorkflowBatch CreateInstance(string name, JObject batch, Stack<WorkflowBatch> workflows)

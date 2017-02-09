@@ -12,25 +12,41 @@ namespace TrustStampCore.Extensions
 {
     public static class JsonExtensions
     {
-        public static void SetProperty(this JToken token, string name, object val)
+        public static void SetProperty(this JObject token, string name, object val)
         {
-            if (!token.HasValues)
-                token.Replace(new JObject());
-            token[name].Replace(new JProperty(name, val));
+            if (token == null)
+                return;
+
+            if (token.Type != JTokenType.Object)
+                return;
+                
+            token[name] = new JValue(val);
         }
 
-        public static JProperty EnsureProperty(this JToken token, string name, object val)
+        public static JValue EnsureProperty(this JToken token, string name, object val)
         {
-            if (!token.HasValues)
-                token.Replace(new JObject(new JProperty(name, val)));
-            return (JProperty)token[name];
+            if (token == null)
+                return null;
+
+            if (token.Type != JTokenType.Object)
+                return null;
+
+            if (token[name] != null)
+                return (JValue)token[name];
+            ((JObject)token).Add(new JProperty(name, val));
+            return (JValue)token[name];
         }
 
-        public static JObject EnsureObject(this JToken token)
+        public static JObject EnsureObject(this JToken token, string name)
         {
-            if (!token.HasValues)
-                token.Replace(new JObject());
-            return (JObject)token;
+            if (token == null)
+                return null;
+
+
+            if (token.Type != JTokenType.Object)
+                return null;
+
+            return (token[name] == null) ? (JObject)(token[name] = new JObject()) : (JObject)token[name];
         }
 
 

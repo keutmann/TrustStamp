@@ -62,7 +62,7 @@ namespace TrustStampCore.Workflows
 
         public void SetStateName()
         {
-            CurrentBatch["state"].EnsureObject().SetProperty("name", Name);
+            CurrentBatch.EnsureObject("state").SetProperty("name", Name);
         }
 
         public virtual void Push(string name)

@@ -8,7 +8,7 @@ namespace TrustStampCore.Workflows
 {
     public class RemotePayWorkflow : BlockchainWorkflowBatch
     {
-        public JProperty Retry { get; set; }
+        public JValue Retry { get; set; }
 
         public override bool Initialize()
         {
@@ -16,7 +16,7 @@ namespace TrustStampCore.Workflows
             if (!EnsureDependencies())
                 return false;
 
-            var remotepay = CurrentBatch["state"]["remotepay"].EnsureObject();
+            var remotepay = CurrentBatch["state"].EnsureObject("remotepay");
             Retry = remotepay.EnsureProperty("retry", 0);
             return true;
         }
@@ -39,8 +39,8 @@ namespace TrustStampCore.Workflows
             }
 
             // Wait some time to see if someone pays for the Batch root!
-            Retry.Value = Retry.Value.ToInteger() + 1;
-            if (Retry.Value.ToInteger() >= 3)
+            Retry.Value = (int)Retry.Value + 1;
+            if ((int)Retry.Value >= 3)
                 Push(new FailedWorkflow("Failed 3 times waiting for payment on Root."));
             else
                 Push(new SleepWorkflow(DateTime.Now.AddHours(3), Name)); // Sleep and retry this workflow

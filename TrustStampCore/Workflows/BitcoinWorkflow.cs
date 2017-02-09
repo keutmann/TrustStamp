@@ -9,14 +9,14 @@ namespace TrustStampCore.Workflows
 {
     public class BitcoinWorkflow : WorkflowBatch
     {
-        public JProperty Retry { get; set; }
+        public JValue Retry { get; set; }
 
         public override bool Initialize()
         {
             if (!base.Initialize())
                 return false;
 
-            var bitcoin = CurrentBatch["state"]["bitcoin"].EnsureObject();
+            var bitcoin = CurrentBatch["state"].EnsureObject("bitcoin");
             Retry = bitcoin.EnsureProperty("retry", 0);
 
             return true;
@@ -47,9 +47,9 @@ namespace TrustStampCore.Workflows
                 }
                 else
                 {
-                    Retry.Value = Retry.Value.ToInteger() + 1;
+                    Retry.Value = (int)Retry.Value + 1;
 
-                    if (Retry.Value.ToInteger() >= 3)
+                    if ((int)Retry.Value >= 3)
                         Push(new FailedWorkflow("Failed 3 times creating a blockchain Transaction."));
                     else
                         Push(new SleepWorkflow(DateTime.Now.AddHours(2), Name)); // Sleep to 2 hours and retry this workflow

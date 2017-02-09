@@ -77,6 +77,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Extensions\JsonExtensionsTest.cs" />
     <Compile Include="Core\Repository\DBBatchTableTest.cs" />
     <Compile Include="Core\Repository\DBProofTableTest.cs" />
     <Compile Include="Core\Services\BatchTest.cs" />

@@ -12,8 +12,8 @@ namespace TrustStampCore.Workflows
         protected DateTime DateTimeOfInstance;
         protected DateTime TimeoutDate;
         protected string NextWorkflowName;
-        protected JProperty Timeout;
-        protected JProperty NextWorkflow;
+        protected JValue Timeout;
+        protected JValue NextWorkflow;
 
 
         public SleepWorkflow()
@@ -32,7 +32,7 @@ namespace TrustStampCore.Workflows
         {
             if (!base.Initialize())
                 return false;
-            Sleep = CurrentBatch["state"]["sleep"].EnsureObject();
+            Sleep = CurrentBatch["state"].EnsureObject("sleep");
             Timeout = Sleep.EnsureProperty("timeout", TimeoutDate);
             NextWorkflow = Sleep.EnsureProperty("nextworkflow", NextWorkflowName);
             return true;
@@ -40,14 +40,14 @@ namespace TrustStampCore.Workflows
 
         public override void Execute()
         {
-            var timeOutDate = Timeout.Value.ToDateTime(DateTimeOfInstance);
+            var timeOutDate = (DateTime)Timeout.Value; //.ToDateTime(DateTimeOfInstance);
             if (DateTimeOfInstance == timeOutDate)
                 WriteLog("Workflow sleeping, reactivate on "+timeOutDate.ToString()); // Will on be called once!
 
             if (DateTimeOfInstance < timeOutDate)
                 return; // Not ready yet!
 
-             var wf = WorkflowEngine.CreateInstance(NextWorkflow.Value.ToStringValue(), CurrentBatch, Workflows);
+             var wf = WorkflowEngine.CreateInstance((string)NextWorkflow.Value, CurrentBatch, Workflows);
             Push(wf);
 
             Update();
