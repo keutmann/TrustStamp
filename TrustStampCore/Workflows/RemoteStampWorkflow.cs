@@ -6,25 +6,20 @@ namespace TrustStampCore.Workflows
 {
     public class RemoteStampWorkflow : WorkflowBatch
     {
+
+
         public override void Execute()
         {
-
-            using (var db = TrustStampDatabase.Open())
+            var remoteEndpoint = App.Config["remoteEndpoint"].ToStringValue().Trim();
+            if (!VerifyEndpoint(remoteEndpoint)) // No WIF key, then try to stamp remotely
             {
-                var remoteEndpoint = App.Config["remoteEndpoint"].ToStringValue().Trim();
-                if (!VerifyEndpoint(remoteEndpoint)) // No WIF key, then try to stamp remotely
-                {
-                    WriteLog("Invalid remoteEndpoint", db); // No comment!
-                    Push(new FailedWorkflow());
-                    return;
-                }
-
-
-                // Reg hash to remote
-                //Push(new MerkleWorkflow());
-
-                db.BatchTable.Update(CurrentBatch);
+                WriteLog("Invalid remoteEndpoint"); // No comment!
+                Push(new FailedWorkflow());
+                return;
             }
+
+
+            Update();
         }
 
         private bool VerifyEndpoint(string endpoint)

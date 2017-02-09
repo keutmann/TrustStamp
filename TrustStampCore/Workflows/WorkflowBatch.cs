@@ -5,15 +5,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TrustStampCore.Repository;
+using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Workflows
 {
 
 
-    public abstract class WorkflowBatch
+    public abstract class WorkflowBatch : IDisposable
     {
         public JObject CurrentBatch { get; set; }
         public Stack<WorkflowBatch> Workflows { get; set; }
+
+        TrustStampDatabase _dataBase = null;
+        public TrustStampDatabase DataBase {
+            get
+            {
+                return _dataBase ?? (_dataBase = TrustStampDatabase.Open());
+            }
+        }
 
         public virtual string Name
         {
@@ -23,22 +32,22 @@ namespace TrustStampCore.Workflows
             }
         }
 
+        public virtual bool Initialize()
+        {
+            SetStateName();
+            return true;
+        }
+
         public virtual void Execute()
         {
         }
 
-        public virtual void UpdateState(JObject state, TrustStampDatabase db)
+        public virtual void WriteLog(string message)
         {
-            CurrentBatch["state"] = state;
-            db.BatchTable.Update(CurrentBatch);
+            WriteLog(Name, message);
         }
 
-        public virtual void WriteLog(string message, TrustStampDatabase db)
-        {
-            WriteLog(Name, message, db);
-        }
-
-        public virtual void WriteLog(string source, string message, TrustStampDatabase db)
+        public virtual void WriteLog(string source, string message)
         {
             var log = (JArray)CurrentBatch["log"];
             log.Add(new JObject(
@@ -51,9 +60,9 @@ namespace TrustStampCore.Workflows
         }
 
 
-        public virtual void SetState()
+        public void SetStateName()
         {
-            CurrentBatch["state"] = new JObject(new JProperty("state", Name));
+            CurrentBatch["state"].EnsureObject().SetProperty("name", Name);
         }
 
         public virtual void Push(string name)
@@ -71,10 +80,21 @@ namespace TrustStampCore.Workflows
         public virtual void Push(WorkflowBatch wf)
         {
             wf.CurrentBatch = CurrentBatch;
-            wf.SetState();
             wf.Workflows = Workflows;
             Workflows.Push(wf);
         }
 
+        public virtual void Update()
+        {
+            DataBase.BatchTable.Update(CurrentBatch);
+        }
+
+        public void Dispose()
+        {
+            Update();
+
+            if (_dataBase != null)
+                _dataBase.Dispose();
+        }
     }
 }

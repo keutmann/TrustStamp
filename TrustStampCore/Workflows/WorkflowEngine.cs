@@ -2,10 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Workflows
 {
@@ -17,12 +14,14 @@ namespace TrustStampCore.Workflows
 
         static WorkflowEngine()
         {
+            AddWorkflowType(typeof(BitcoinWorkflow));
             AddWorkflowType(typeof(FailedWorkflow));
             AddWorkflowType(typeof(MerkleWorkflow));
             AddWorkflowType(typeof(NewWorkflow));
-            AddWorkflowType(typeof(SuccessWorkflow));
-            AddWorkflowType(typeof(BitcoinWorkflow));
+            AddWorkflowType(typeof(RemotePayWorkflow));
+            AddWorkflowType(typeof(RemoteStampWorkflow));
             AddWorkflowType(typeof(SleepWorkflow));
+            AddWorkflowType(typeof(SuccessWorkflow));
         }
 
         private static void AddWorkflowType(Type wfType)
@@ -36,7 +35,6 @@ namespace TrustStampCore.Workflows
         {
             foreach (JObject batch in batchs)
             {
-
                 var wf = CreateInstance(batch, Workflows);
 
                 Workflows.Push(wf);
@@ -47,17 +45,27 @@ namespace TrustStampCore.Workflows
         {
             while(Workflows.Count > 0) // Possiblility for parallel execution!?
             {
-                var wf = Workflows.Pop(); 
-                wf.Execute();
+                using (var wf = Workflows.Pop())
+                {
+                    try
+                    {
+                        if (wf.Initialize()) // Initialize and make sure that dependencies are ready
+                            wf.Execute();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine(ex.Message);
+                    }
+                }
             }
         }
 
         public static WorkflowBatch CreateInstance(JObject batch, Stack<WorkflowBatch> workflows)
         {
             // Set to New state if empty!
-            var name = batch["state"].Contains("state") ? (string)batch["state"]["state"] : typeof(NewWorkflow).Name;
+            var name = batch["state"].EnsureProperty("name", typeof(NewWorkflow).Name);
 
-            return CreateInstance(name, batch, workflows);
+            return CreateInstance(name.Value.ToStringValue(), batch, workflows);
         }
 
         public static WorkflowBatch CreateInstance(string name, JObject batch, Stack<WorkflowBatch> workflows)
@@ -76,7 +84,6 @@ namespace TrustStampCore.Workflows
         public static WorkflowBatch CreateAndSetState(string name, JObject batch, Stack<WorkflowBatch> workflows)
         {
             var wf = CreateInstance(name, batch, workflows);
-            wf.SetState();
             return wf;
         }
     }

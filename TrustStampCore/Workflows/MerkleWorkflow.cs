@@ -14,23 +14,20 @@ namespace TrustStampCore.Workflows
     {
         public override void Execute()
         {
-            using (var db = TrustStampDatabase.Open())
-            {
-                WriteLog("Started", db);
-                db.BatchTable.Update(CurrentBatch);
+            WriteLog("Started");
+            Update();
 
-                // This may take some time.
-                var proofCount = BuildMerkle(db);
+            // This may take some time.
+            var proofCount = BuildMerkle(DataBase);
 
-                WriteLog(string.Format("Finished building {0} proofs.", proofCount), db);
+            WriteLog(string.Format("Finished building {0} proofs.", proofCount));
 
-                if (proofCount > 0)
-                    Push(new BitcoinWorkflow());
-                else
-                    Push(new FailedWorkflow());
+            if (proofCount > 0)
+                Push(new BitcoinWorkflow());
+            else
+                Push(new FailedWorkflow());
 
-                db.BatchTable.Update(CurrentBatch);
-            }
+            Update();
         }
 
         private int BuildMerkle(TrustStampDatabase db)

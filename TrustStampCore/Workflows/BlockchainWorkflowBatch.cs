@@ -11,50 +11,46 @@ namespace TrustStampCore.Workflows
         public IBlockchainRepository BlockchainRepository { get; set; }
         public byte[] Root { get; set; }
 
-        public bool EnsureRepository(TrustStampDatabase db)
+        public bool EnsureRepository()
         {
             var blockchainRepositoryName = App.Config["blockchainprovider"].ToStringValue("blockr");
             var BlockchainRepository = BlockchainFactory.GetRepository(blockchainRepositoryName, BlockchainFactory.GetBitcoinNetwork());
             if (BlockchainRepository == null)
             {
-                WriteLog("No blockchain provider found", db); // No comment!
+                WriteLog("No blockchain provider found"); // No comment!
                 return false;
             }
             return true;
         }
 
-        public bool EnsureRoot(TrustStampDatabase db)
+        public bool EnsureRoot()
         {
             var hash = (byte[])CurrentBatch["root"];
             if (hash.Length == 0)
             {
-                WriteLog("No root to timestamp!", db);
+                WriteLog("No root to timestamp!");
                 return false;
             }
             return true;
         }
 
-        public bool EnsureDependencies(TrustStampDatabase db)
+        public bool EnsureDependencies()
         {
-            if (!EnsureRoot(db))
+            if (!EnsureRoot())
                 return false;
 
-            if (!EnsureRepository(db))
+            if (!EnsureRepository())
                 return false;
 
             return true;
         }
 
-
-        public void PushRetry(int retries, int sleepMinutes)
+        public override bool Initialize()
         {
-            CurrentBatch["state"]["retry"] = CurrentBatch["state"]["retry"].ToInteger() + 1;
-
-            if (CurrentBatch["state"]["retry"].ToInteger() == retries)
-                Push(new FailedWorkflow("Failed "+ retries +" times."));
-            else
-                Push(new SleepWorkflow(DateTime.Now.AddMinutes(sleepMinutes), CurrentBatch)); // Sleep to 2 hours and retry this workflow
+            if (!base.Initialize())
+                return false;
+            
+             return EnsureDependencies(); 
         }
-
     }
 }

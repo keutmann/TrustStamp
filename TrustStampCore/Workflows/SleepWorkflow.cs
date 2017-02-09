@@ -8,9 +8,13 @@ namespace TrustStampCore.Workflows
     public class SleepWorkflow : WorkflowBatch
     {
 
+        protected JObject Sleep;
         protected DateTime DateTimeOfInstance;
         protected DateTime TimeoutDate;
-        protected JToken NextWorkflowState;
+        protected string NextWorkflowName;
+        protected JProperty Timeout;
+        protected JProperty NextWorkflow;
+
 
         public SleepWorkflow()
         {
@@ -18,42 +22,35 @@ namespace TrustStampCore.Workflows
             TimeoutDate = DateTimeOfInstance;
         }
 
-        public SleepWorkflow(DateTime timeoutDate, JToken nextWorkflowstate) : this()
+        public SleepWorkflow(DateTime timeoutDate, string nextWorkflowname) : this()
         {
             TimeoutDate = timeoutDate;
-            NextWorkflowState = nextWorkflowstate;
+            NextWorkflowName = nextWorkflowname;
+        }
+
+        public override bool Initialize()
+        {
+            if (!base.Initialize())
+                return false;
+            Sleep = CurrentBatch["state"]["sleep"].EnsureObject();
+            Timeout = Sleep.EnsureProperty("timeout", TimeoutDate);
+            NextWorkflow = Sleep.EnsureProperty("nextworkflow", NextWorkflowName);
+            return true;
         }
 
         public override void Execute()
         {
+            var timeOutDate = Timeout.Value.ToDateTime(DateTimeOfInstance);
+            if (DateTimeOfInstance == timeOutDate)
+                WriteLog("Workflow sleeping, reactivate on "+timeOutDate.ToString()); // Will on be called once!
 
-            using (var db = TrustStampDatabase.Open())
-            {
-                var timeOutDate = CurrentBatch["state"]["timeout"].ToDateTime(DateTimeOfInstance);
-                if (DateTimeOfInstance == timeOutDate)
-                    WriteLog("Workflow sleeping, reactivate on "+timeOutDate.ToString(), db); // Will on be called once!
+            if (DateTimeOfInstance < timeOutDate)
+                return; // Not ready yet!
 
-                if (DateTimeOfInstance < timeOutDate)
-                    return; // Not ready yet!
+             var wf = WorkflowEngine.CreateInstance(NextWorkflow.Value.ToStringValue(), CurrentBatch, Workflows);
+            Push(wf);
 
-                var nextWorkflowState = (JObject)CurrentBatch["state"]["nextworkflowstate"];
-                var nextWorkflowName = (string)nextWorkflowState["state"];
-
-                var wf = WorkflowEngine.CreateInstance(nextWorkflowName, CurrentBatch, Workflows);
-                Push(wf);
-
-                db.BatchTable.Update(CurrentBatch);
-            }
-        }
-
-        public override void SetState()
-        {
-            CurrentBatch["state"] = new JObject(
-                new JProperty("state", Name),
-                new JProperty("timeout", TimeoutDate),
-                new JProperty("nextworkflowstate", NextWorkflowState)
-                );
-
+            Update();
         }
     }
 }

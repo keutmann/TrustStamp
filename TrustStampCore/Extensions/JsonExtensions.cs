@@ -12,6 +12,28 @@ namespace TrustStampCore.Extensions
 {
     public static class JsonExtensions
     {
+        public static void SetProperty(this JToken token, string name, object val)
+        {
+            if (!token.HasValues)
+                token.Replace(new JObject());
+            token[name].Replace(new JProperty(name, val));
+        }
+
+        public static JProperty EnsureProperty(this JToken token, string name, object val)
+        {
+            if (!token.HasValues)
+                token.Replace(new JObject(new JProperty(name, val)));
+            return (JProperty)token[name];
+        }
+
+        public static JObject EnsureObject(this JToken token)
+        {
+            if (!token.HasValues)
+                token.Replace(new JObject());
+            return (JObject)token;
+        }
+
+
         public static string CustomRender(this JToken token)
         {
             var serializer = new JsonSerializer();

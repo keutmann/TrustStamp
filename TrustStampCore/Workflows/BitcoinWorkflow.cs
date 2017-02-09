@@ -9,12 +9,17 @@ namespace TrustStampCore.Workflows
 {
     public class BitcoinWorkflow : WorkflowBatch
     {
-        public override void SetState()
+        public JProperty Retry { get; set; }
+
+        public override bool Initialize()
         {
-            CurrentBatch["state"] = new JObject(
-                new JProperty("state", Name),
-                new JProperty("retry", 0)
-                );
+            if (!base.Initialize())
+                return false;
+
+            var bitcoin = CurrentBatch["state"]["bitcoin"].EnsureObject();
+            Retry = bitcoin.EnsureProperty("retry", 0);
+
+            return true;
         }
 
         public override void Execute()
@@ -32,7 +37,7 @@ namespace TrustStampCore.Workflows
                 var blockchainRepository = BlockchainFactory.GetRepository(blockchainRepositoryName, BlockchainFactory.GetBitcoinNetwork());
                 if(blockchainRepository == null)
                 {
-                    WriteLog("No blockchain provider found", db); // No comment!
+                    WriteLog("No blockchain provider found"); // No comment!
                     return;
                 }
 
@@ -42,9 +47,9 @@ namespace TrustStampCore.Workflows
                 }
                 else
                 {
-                    CurrentBatch["state"]["retry"] = CurrentBatch["state"]["retry"].ToInteger() + 1;
+                    Retry.Value = Retry.Value.ToInteger() + 1;
 
-                    if (CurrentBatch["state"]["retry"].ToInteger() == 3)
+                    if (Retry.Value.ToInteger() >= 3)
                         Push(new FailedWorkflow("Failed 3 times creating a blockchain Transaction."));
                     else
                         Push(new SleepWorkflow(DateTime.Now.AddHours(2), Name)); // Sleep to 2 hours and retry this workflow
@@ -61,7 +66,7 @@ namespace TrustStampCore.Workflows
             var hash = (byte[])CurrentBatch["root"];
             if (hash.Length == 0)
             {
-                WriteLog("No root to timestamp!", db);
+                WriteLog("No root to timestamp!");
                 return true;
             }
 
@@ -73,7 +78,7 @@ namespace TrustStampCore.Workflows
                     new JProperty("tx", "No transaction (Demo)")
                     ));
 
-                WriteLog("Success", db);
+                WriteLog("Success");
                 return true;
             }
 
@@ -88,13 +93,13 @@ namespace TrustStampCore.Workflows
                     new JProperty("batchtx", txs.Item2.ToHex())
                     ));
 
-                WriteLog("Success", db);
+                WriteLog("Success");
                 return true;
 
             }
             catch (Exception ex)
             {
-                WriteLog("Failed: " + ex.Message, db);
+                WriteLog("Failed: " + ex.Message);
                 return false;
             }
         }

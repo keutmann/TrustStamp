@@ -12,13 +12,10 @@ namespace TrustStampCore.Workflows
     {
         public override void Execute()
         {
-            using (var db = TrustStampDatabase.Open())
-            {
-                WriteLog("The workflow has finished", db);
+            WriteLog("The workflow has finished");
 
-                CurrentBatch["active"] = 0;
-                db.BatchTable.Update(CurrentBatch);
-            }
+            CurrentBatch["active"] = 0;
+            Update();
         }
     }
 }

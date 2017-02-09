@@ -20,18 +20,14 @@ namespace TrustStampCore.Workflows
 
         public override void Execute()
         {
+            var msg = "Workflow has stopped";
+            if (!string.IsNullOrEmpty(Message))
+                msg = " : " + Message;
 
-            using (var db = TrustStampDatabase.Open())
-            {
-                var msg = "Workflow has stopped";
-                if (!string.IsNullOrEmpty(Message))
-                    msg = " : " + Message;
+            WriteLog(msg);
 
-                WriteLog(msg, db);
-
-                CurrentBatch["active"] = 0;
-                db.BatchTable.Update(CurrentBatch);
-            }
+            CurrentBatch["active"] = 0;
+            Update();
         }
     }
 }
