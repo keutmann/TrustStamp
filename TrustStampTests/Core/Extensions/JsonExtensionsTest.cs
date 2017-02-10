@@ -49,5 +49,16 @@ namespace TrustStampTests.Core.Extensions
 
         }
 
+        [Test]
+        public void CustomRender()
+        {
+            var hello = Encoding.Unicode.GetBytes("Hello");
+            var com = new JObject(new JProperty("test", hello));
+            var result = com.CustomRender();
+
+            Assert.IsTrue(result.Contains("test"));
+            Assert.IsFalse(result.Contains("xmlns"));
+        }
+
     }
 }

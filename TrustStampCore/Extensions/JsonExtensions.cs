@@ -56,10 +56,10 @@ namespace TrustStampCore.Extensions
 
             //var sb = new StringBuilder();
             var sw = new StringWriter();
-            var jtw = new JsonTextWriter(sw);
+            //var jtw = new JsonTextWriter(sw);
 
             serializer.Converters.Add(new BytesToHexConverter());
-            serializer.Serialize(jtw, token);
+            serializer.Serialize(sw, token);
             return sw.ToString();
         }
 

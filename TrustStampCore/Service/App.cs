@@ -42,13 +42,16 @@ namespace TrustStampCore.Service
             Config["port"] = 12700;
             Config["eventlog"] = !Environment.UserInteractive; // Activate event logger if no console is active.
             Config["test"] = false; // General test, no real data is stored, run in memory database!
-            Config["partition"] = "yyyyMMddhh0000"; // Create a new batch every hour.
-            Config["processinterval"] = 1000 * 60; // 1 minute
+            Config["partition"] = "yyyyMMddhhmm00"; // Create a new batch every hour.
+            Config["processinterval"] = 1000 * 30; // 30 sec
 
             // Bitcoin
             Config["network"] = "TestNet";  // Bitcoin Private key in wif format
             Config["btcwif"] = "cMcGZkth7ufvQC59NSTSCTpepSxXbig9JfhCYJtn9RppU4DXx4cy"; // Test net key
             Config["btcfee"] = "0.0001";
+            Config["remoteendpoint"] = ""; // Connect to a remote TrustStamp server
+            Config["remoteport"] = 12700; // Connect to a remote TrustStamp server port
+
 
             Config["dbconnectionstring"] = "";  // Connection or dbfilename
             Config["dbfilename"] = "TrustStamp.db";

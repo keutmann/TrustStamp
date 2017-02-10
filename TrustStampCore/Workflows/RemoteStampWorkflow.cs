@@ -10,10 +10,10 @@ namespace TrustStampCore.Workflows
 
         public override void Execute()
         {
-            var remoteEndpoint = App.Config["remoteEndpoint"].ToStringValue().Trim();
+            var remoteEndpoint = App.Config["remoteendpoint"].ToStringValue().Trim();
             if (!VerifyEndpoint(remoteEndpoint)) // No WIF key, then try to stamp remotely
             {
-                WriteLog("Invalid remoteEndpoint"); // No comment!
+                WriteLog("Invalid remote endpoint"); // No comment!
                 Push(new FailedWorkflow());
                 return;
             }

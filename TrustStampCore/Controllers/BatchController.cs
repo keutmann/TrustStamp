@@ -18,7 +18,7 @@ namespace TrustStampCore.Controllers
                 using (var db = TrustStampDatabase.Open())
                 {
                     var items = db.BatchTable.Select(100);
-                    return Ok(items.CustomRender());
+                    return Ok(items);
                 }
             }
             catch (Exception ex)
@@ -35,7 +35,7 @@ namespace TrustStampCore.Controllers
                 using (var batch = Batch.OpenWithDatabase())
                 {
                     var item = batch.Get(id);
-                    return Ok(item.CustomRender());
+                    return Ok(item);
                 }
             }
             catch (Exception ex)

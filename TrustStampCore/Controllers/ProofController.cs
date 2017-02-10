@@ -20,7 +20,7 @@ namespace TrustStampCore.Controllers
                 using (var proof = Proof.OpenWithDatabase())
                 {
                     var result = proof.Add(id);
-                    return Ok(result.CustomRender());
+                    return Ok(result);
                 }
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ namespace TrustStampCore.Controllers
                     if (result == null)
                         return Ok("ID Not found!");
 
-                    return Ok(result.CustomRender());
+                    return Ok(result);
                 }
             }
             catch (Exception ex)
