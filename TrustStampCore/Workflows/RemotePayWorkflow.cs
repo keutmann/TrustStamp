@@ -39,8 +39,8 @@ namespace TrustStampCore.Workflows
             }
 
             // Wait some time to see if someone pays for the Batch root!
-            Retry.Value = (int)Retry.Value + 1;
-            if ((int)Retry.Value >= 3)
+            Retry.Value = (int)Retry + 1;
+            if ((int)Retry >= 3)
                 Push(new FailedWorkflow("Failed 3 times waiting for payment on Root."));
             else
                 Push(new SleepWorkflow(DateTime.Now.AddHours(3), Name)); // Sleep and retry this workflow

@@ -9,16 +9,26 @@ namespace TrustStampCore.Workflows
 {
     public class BitcoinWorkflow : WorkflowBatch
     {
-        public JValue Retry { get; set; }
+        private JObject _bitcoinState = null;
+        public JObject BitcoinState {
+            get
+            {
+                return _bitcoinState ?? (_bitcoinState = CurrentBatch["state"].EnsureObject("bitcoin"));
+            }
+        }
+
+        private JValue _retry = null;
+        public JValue Retry {
+            get
+            {
+                return _retry ?? (_retry = BitcoinState.EnsureProperty("retry", 0));
+            }
+        }
 
         public override bool Initialize()
         {
             if (!base.Initialize())
                 return false;
-
-            var bitcoin = CurrentBatch["state"].EnsureObject("bitcoin");
-            Retry = bitcoin.EnsureProperty("retry", 0);
-
             return true;
         }
 
@@ -31,35 +41,32 @@ namespace TrustStampCore.Workflows
                 return;
             }
 
-            using (var db = TrustStampDatabase.Open())
+            var blockchainRepositoryName = App.Config["blockchainprovider"].ToStringValue("blockr");
+            var blockchainRepository = BlockchainFactory.GetRepository(blockchainRepositoryName, BlockchainFactory.GetBitcoinNetwork());
+            if(blockchainRepository == null)
             {
-                var blockchainRepositoryName = App.Config["blockchainprovider"].ToStringValue("blockr");
-                var blockchainRepository = BlockchainFactory.GetRepository(blockchainRepositoryName, BlockchainFactory.GetBitcoinNetwork());
-                if(blockchainRepository == null)
-                {
-                    WriteLog("No blockchain provider found"); // No comment!
-                    return;
-                }
-
-                if (TimeStampBatch(db, wif, blockchainRepository, BlockchainFactory.GetBitcoinNetwork()))
-                {
-                    Push(new SuccessWorkflow());
-                }
-                else
-                {
-                    Retry.Value = (int)Retry.Value + 1;
-
-                    if ((int)Retry.Value >= 3)
-                        Push(new FailedWorkflow("Failed 3 times creating a blockchain Transaction."));
-                    else
-                        Push(new SleepWorkflow(DateTime.Now.AddHours(2), Name)); // Sleep to 2 hours and retry this workflow
-                }
-
-                db.BatchTable.Update(CurrentBatch);
+                WriteLog("No blockchain provider found"); // No comment!
+                return;
             }
+
+            if (TimeStampBatch(wif, blockchainRepository, BlockchainFactory.GetBitcoinNetwork()))
+            {
+                Push(new SuccessWorkflow());
+            }
+            else
+            {
+                Retry.Value = (int)Retry + 1;
+
+                if ((int)Retry >= 3)
+                    Push(new FailedWorkflow("Failed 3 times creating a blockchain Transaction."));
+                else
+                    Push(new SleepWorkflow(DateTime.Now.AddHours(3), Name)); // Sleep to 3 hours and retry this workflow
+            }
+
+            Update();
         }
 
-        public bool TimeStampBatch(TrustStampDatabase db, string wif, IBlockchainRepository repository, Network network)
+        public bool TimeStampBatch(string wif, IBlockchainRepository repository, Network network)
         {
             var btc = new BitcoinManager(wif, repository, network);
 

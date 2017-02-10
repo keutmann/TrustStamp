@@ -31,7 +31,7 @@ namespace TrustStampCore.Service
                 var btc = new BitcoinManager(wif, null, BlockchainFactory.GetBitcoinNetwork());
                 obj.Add(new JProperty("blockchain", new JObject(
                         new JProperty("btc", new JObject(
-                            new JProperty("network", btc.CurrentNetwork.Name),
+                            new JProperty("network", btc.Network.Name),
                             new JProperty("address", btc.SourceAddress.ToWif())
                             ))
                         )));

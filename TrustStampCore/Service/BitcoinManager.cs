@@ -15,8 +15,6 @@ namespace TrustStampCore.Service
 {
     public class BitcoinManager
     {
-        public Network CurrentNetwork = Network.Main;
-
         public string WIF { get; }
         public Key SourceKey { get; }
         public BitcoinPubKeyAddress SourceAddress { get; }
@@ -26,10 +24,11 @@ namespace TrustStampCore.Service
 
         public BitcoinManager(string wif, IBlockchainRepository repository, Network network)
         {
+            Network = network;
             WIF = wif;
             var secret = new BitcoinSecret(WIF);
             SourceKey = secret.PrivateKey;
-            SourceAddress = SourceKey.PubKey.GetAddress(CurrentNetwork);
+            SourceAddress = SourceKey.PubKey.GetAddress(Network);
             Repository = repository;
             Network = network;
         }
@@ -38,16 +37,22 @@ namespace TrustStampCore.Service
         {
             Key batchKey = GetKey(batchHash);
 
-            var unspent = Repository.GetUnspentAsync(SourceKey.PubKey.GetAddress(CurrentNetwork).ToWif());
+            var unspent = Repository.GetUnspentAsync(SourceKey.PubKey.GetAddress(Network).ToWif());
             unspent.Wait();
             IEnumerable<Coin> coins = unspent.Result;
+            if (coins.Count() == 0)
+                throw new ApplicationException("No coins to spend");
 
             var fee = Repository.GetEstimatedFee().FeePerK;
+            var totalAmount = coins.Sum(c => c.Amount.Satoshi);
+            if (fee.Satoshi * 2 > totalAmount)
+                throw new ApplicationException("Not enough coin to spend.");
+
 
             var sourceTx = new TransactionBuilder()
                 .AddCoins(coins)
                 .AddKeys(SourceKey)
-                .Send(batchKey.PubKey.GetAddress(CurrentNetwork), fee) // Send to Batch address
+                .Send(batchKey.PubKey.GetAddress(Network), fee) // Send to Batch address
                 .SendFees(fee)
                 .SetChange(SourceAddress)
                 .BuildTransaction(true);
