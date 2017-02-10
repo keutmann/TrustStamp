@@ -28,7 +28,7 @@ namespace TrustStampCore.Service
             var wif = App.Config["btcwif"].ToStringValue();
             if (!string.IsNullOrEmpty(wif))
             {
-                var btc = new BitcoinManager(wif, null, BlockchainFactory.GetBitcoinNetwork());
+                var btc = new Bitcoin(wif, null, BlockchainFactory.GetBitcoinNetwork());
                 obj.Add(new JProperty("blockchain", new JObject(
                         new JProperty("btc", new JObject(
                             new JProperty("network", btc.Network.Name),

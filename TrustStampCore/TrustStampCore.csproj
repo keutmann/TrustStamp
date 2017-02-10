@@ -99,7 +99,7 @@
     <Compile Include="Repository\TrustStampDatabase.cs" />
     <Compile Include="Service\App.cs" />
     <Compile Include="Service\Batch.cs" />
-    <Compile Include="Service\BitcoinManager.cs" />
+    <Compile Include="Service\Bitcoin.cs" />
     <Compile Include="Service\BusinessDB.cs" />
     <Compile Include="Service\BytesToHexConverter.cs" />
     <Compile Include="Service\Crypto.cs" />
@@ -122,7 +122,7 @@
     <Compile Include="Workflows\FailedWorkflow.cs" />
     <Compile Include="Workflows\NewWorkflow.cs" />
     <Compile Include="Workflows\WorkflowBatch.cs" />
-    <Compile Include="Workflows\WorkflowEngine.cs" />
+    <Compile Include="Workflows\WorkflowContext.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

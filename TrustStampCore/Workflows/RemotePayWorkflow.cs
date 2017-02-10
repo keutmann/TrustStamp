@@ -25,7 +25,7 @@ namespace TrustStampCore.Workflows
         {
             WriteLog("Waiting for payment on Batch root");
 
-            var rootKey = BitcoinManager.GetKey(Root);
+            var rootKey = Bitcoin.GetKey(Root);
             var rootAddress = rootKey.PubKey.GetAddress(BlockchainFactory.GetBitcoinNetwork());
             var info = BlockchainRepository.GetAddressInfo(rootAddress.ToWif());
 

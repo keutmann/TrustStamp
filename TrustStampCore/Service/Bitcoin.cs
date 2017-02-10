@@ -13,41 +13,33 @@ using TrustStampCore.Repository;
 
 namespace TrustStampCore.Service
 {
-    public class BitcoinManager
+    public class Bitcoin
     {
         public string WIF { get; }
         public Key SourceKey { get; }
         public BitcoinPubKeyAddress SourceAddress { get; }
         public bool NoKey { get; }
-        public IBlockchainRepository Repository { get; }
+        public IBlockchainRepository Blockchain { get; }
         public Network Network { get; }
 
-        public BitcoinManager(string wif, IBlockchainRepository repository, Network network)
+        public Bitcoin(string wif, IBlockchainRepository blockchain, Network network)
         {
             Network = network;
             WIF = wif;
             var secret = new BitcoinSecret(WIF);
             SourceKey = secret.PrivateKey;
             SourceAddress = SourceKey.PubKey.GetAddress(Network);
-            Repository = repository;
+            Blockchain = blockchain;
             Network = network;
         }
 
-        public Tuple<Transaction, Transaction> Send(byte[] batchHash)
+        public Tuple<Transaction, Transaction> Send(byte[] batchHash, Transaction previousTx)
         {
             Key batchKey = GetKey(batchHash);
+            
+            var fee = Blockchain.GetEstimatedFee().FeePerK;
 
-            var unspent = Repository.GetUnspentAsync(SourceKey.PubKey.GetAddress(Network).ToWif());
-            unspent.Wait();
-            IEnumerable<Coin> coins = unspent.Result;
-            if (coins.Count() == 0)
-                throw new ApplicationException("No coins to spend");
-
-            var fee = Repository.GetEstimatedFee().FeePerK;
-            var totalAmount = coins.Sum(c => c.Amount.Satoshi);
-            if (fee.Satoshi * 2 > totalAmount)
-                throw new ApplicationException("Not enough coin to spend.");
-
+            var coins = GetCoins(previousTx, fee);
 
             var sourceTx = new TransactionBuilder()
                 .AddCoins(coins)
@@ -57,7 +49,7 @@ namespace TrustStampCore.Service
                 .SetChange(SourceAddress)
                 .BuildTransaction(true);
 
-            Repository.BroadcastAsync(sourceTx);
+            Blockchain.BroadcastAsync(sourceTx);
 
             var txNota = new TransactionBuilder()
                 .AddCoins(sourceTx.Outputs.AsCoins())
@@ -65,10 +57,36 @@ namespace TrustStampCore.Service
                 .AddKeys(batchKey)
                 .SendFees(fee)
                 .BuildTransaction(true);
-            
-            Repository.BroadcastAsync(txNota);
-           
+
+            Blockchain.BroadcastAsync(txNota);
+
             return Tuple.Create(sourceTx, txNota);
+        }
+
+        public IEnumerable<Coin> GetCoins(Transaction previousTx, Money fee)
+        {
+            IEnumerable<Coin> coins = null;
+            long sumOfCoins = 0;
+            if (previousTx != null)
+            {
+                coins = previousTx.Outputs.AsCoins().Where(c => c.ScriptPubKey.GetDestinationAddress(Network) == SourceAddress);
+                sumOfCoins = coins.Sum(c => c.Amount.Satoshi);
+            }
+
+            if (fee.Satoshi * 2 > sumOfCoins)
+            {
+                var unspent = Blockchain.GetUnspentAsync(SourceKey.PubKey.GetAddress(Network).ToWif());
+                unspent.Wait();
+                coins = unspent.Result;
+                if (coins.Count() == 0)
+                    throw new ApplicationException("No coins to spend");
+
+                sumOfCoins = coins.Sum(c => c.Amount.Satoshi);
+                if (fee.Satoshi * 2 > sumOfCoins)
+                    throw new ApplicationException("Not enough coin to spend.");
+            }
+
+            return coins;
         }
 
         public static Key GetKey(byte[] data)

@@ -12,6 +12,8 @@ namespace TrustStampCore.Workflows
 
         public Stack<WorkflowBatch> Workflows = new Stack<WorkflowBatch>();
 
+        public Dictionary<string, object> KeyValueTable = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
         static WorkflowContext()
         {
             AddWorkflowType(typeof(BitcoinWorkflow));

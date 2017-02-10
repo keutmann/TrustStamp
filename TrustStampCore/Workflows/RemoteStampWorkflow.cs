@@ -1,6 +1,7 @@
 ﻿using TrustStampCore.Repository;
 using TrustStampCore.Service;
 using TrustStampCore.Extensions;
+using System.Net;
 
 namespace TrustStampCore.Workflows
 {
@@ -18,6 +19,19 @@ namespace TrustStampCore.Workflows
                 return;
             }
 
+
+            // Check the root at remote!
+
+
+            // Submit a root!
+            var id = ((byte[])CurrentBatch["root"]).ConvertToHex();
+            var url = remoteEndpoint + App.Config["remoteport"].ToInteger() + "/api/proof/" + id;
+            using (WebClient client = new WebClient())
+            {
+                var proof = client.UploadString(url, id);
+                // Put proof on the CurrentBatch State?
+            }
+            
 
             Update();
         }

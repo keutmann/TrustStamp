@@ -58,7 +58,11 @@ namespace TrustStampCore.Workflows
                 Retry.Value = (int)Retry + 1;
 
                 if ((int)Retry >= 3)
-                    Push(new FailedWorkflow("Failed 3 times creating a blockchain Transaction."));
+                {
+                    //Push(new FailedWorkflow("Failed 3 times creating a blockchain Transaction."));
+                    Push(new RemoteStampWorkflow()); // Try to use a remote service
+
+                }
                 else
                     Push(new SleepWorkflow(DateTime.Now.AddHours(3), Name)); // Sleep to 3 hours and retry this workflow
             }
@@ -68,7 +72,7 @@ namespace TrustStampCore.Workflows
 
         public bool TimeStampBatch(string wif, IBlockchainRepository repository, Network network)
         {
-            var btc = new BitcoinManager(wif, repository, network);
+            var btc = new Bitcoin(wif, repository, network);
 
             var hash = (byte[])CurrentBatch["root"];
             if (hash.Length == 0)
@@ -91,13 +95,18 @@ namespace TrustStampCore.Workflows
 
             try
             {
-                var txs = btc.Send(hash);
+                var previousTx = Context.KeyValueTable.ContainsKey("bitcoinprevioustx") ?
+                            (Transaction)Context.KeyValueTable["bitcoinprevioustx"] : null;
+
+                var result = btc.Send(hash, previousTx);
+
+                Context.KeyValueTable["bitcoinprevioustx"] = result.Item1; // Item1 is Source Transaction!
 
                 var blockchainNode = (JArray)CurrentBatch["blockchain"];
                 blockchainNode.Add(new JObject(
                     new JProperty("type", "btc-testnet"),
-                    new JProperty("sourcetx", txs.Item1.ToHex()),
-                    new JProperty("batchtx", txs.Item2.ToHex())
+                    new JProperty("sourcetx", result.Item1.ToHex()),
+                    new JProperty("batchtx", result.Item2.ToHex())
                     ));
 
                 WriteLog("Success");

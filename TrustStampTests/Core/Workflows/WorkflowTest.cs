@@ -69,7 +69,7 @@ namespace TrustStampTests.Core.Services
         }
 
         [Test]
-        public void TestWorkflowEngine()
+        public void TestWorkflowContext()
         {
             JArray batchs = null;
             using (var db = TrustStampDatabase.Open())
@@ -94,6 +94,17 @@ namespace TrustStampTests.Core.Services
             Console.WriteLine(batchs[0].ToString()); //.CustomRender());
             
             Assert.AreEqual(1, batchs.Count);
+        }
+
+        [Test]
+        public void KeyValueTable()
+        {
+            var context = new WorkflowContext();
+
+            context.KeyValueTable["test"] = "test";
+            Assert.IsNotNull(context.KeyValueTable["test"]);
+            Assert.IsFalse(context.KeyValueTable.ContainsKey("noentry"));
+
         }
     }
 }
