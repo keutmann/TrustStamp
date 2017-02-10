@@ -52,7 +52,7 @@ namespace TrustStampCore.Service
         {
             var batchs = DB.BatchTable.GetActive();
 
-            var engine = new WorkflowEngine(batchs);
+            var engine = new WorkflowContext(batchs);
             engine.Execute();
         }
 

@@ -18,11 +18,11 @@ namespace TrustStampCore.Repository
             if (TableExist())
                 return;
 
-            string sql = "CREATE TABLE IF NOT EXISTS Batch "+
+            string sql = "CREATE TABLE IF NOT EXISTS Batch " +
                 "(" +
                 "partition TEXT PRIMARY KEY," +
                 "root BLOB," +
-                "state TEXT,"+
+                "state TEXT," +
                 "blockchain TEXT," +
                 "active INTEGER," +
                 "log TEXT" +
@@ -36,15 +36,7 @@ namespace TrustStampCore.Repository
 
         public JObject AddDefault(string partition)
         {
-            var item = new JObject(
-                new JProperty("partition", partition),
-                new JProperty("root", null),
-                new JProperty("state", new JObject()),
-                new JProperty("blockchain", new JArray()),
-                new JProperty("active", 1),
-                new JProperty("log", new JArray())
-                );
-
+            var item = NewItem(partition);
             Add(item);
 
             return item;
@@ -124,15 +116,28 @@ namespace TrustStampCore.Repository
             return new JObject(
                     new JProperty("partition", reader["partition"]),
                     new JProperty("root", reader["root"]),
-                    new JProperty("state", reader["state"]),
+                    new JProperty("state", JObject.Parse((string)reader["state"])),
                     new JProperty("blockchain", !string.IsNullOrEmpty((string)reader["blockchain"]) ? JArray.Parse((string)reader["blockchain"]) : new JArray()),
                     new JProperty("active", reader["active"]),
                     new JProperty("log", !string.IsNullOrEmpty((string)reader["log"]) ? JArray.Parse((string)reader["log"]) : new JArray())
                     );
         }
 
-        
+        public static JObject NewItem(string partition)
+        {
+            var item = new JObject(
+                new JProperty("partition", partition),
+                new JProperty("root", null),
+                new JProperty("state", new JObject()),
+                new JProperty("blockchain", new JArray()),
+                new JProperty("active", 1),
+                new JProperty("log", new JArray())
+                );
+
+            return item;
+        }
 
     }
+
 }
 

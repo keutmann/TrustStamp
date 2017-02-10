@@ -8,6 +8,7 @@ namespace TrustStampCore.Workflows
         {
             WriteLog("Workflow started");
 
+            Push(new MerkleWorkflow());
             Update();
         }
 

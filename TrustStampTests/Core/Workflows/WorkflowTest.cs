@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using TrustStampCore.Service;
 using TrustStampCore.Extensions;
 using TrustStampCore.Repository;
@@ -29,45 +26,51 @@ namespace TrustStampTests.Core.Services
         [Test]
         public void TestNewWorkflow()
         {
-            var partition = Batch.GetCurrentPartition();
-            JObject batchItem = null;
-            using (var db = TrustStampDatabase.Open())
-            {
-                batchItem = db.BatchTable.AddDefault(partition);
-            }
+            JObject batchItem = DBBatchTable.NewItem(Batch.GetCurrentPartition());
 
+            var wf = new NewWorkflow();
+            wf.Context = new WorkflowContext();
+            wf.CurrentBatch = batchItem;
 
-            var wf = WorkflowEngine.CreateAndSetState(typeof(NewWorkflow).Name, batchItem, new Stack<WorkflowBatch>());
+            Assert.IsTrue(wf.Initialize());
+
             wf.Execute();
 
             Console.WriteLine("Log: "+wf.CurrentBatch["log"]);
 
-            Assert.AreEqual(1, wf.Workflows.Count);
-            Assert.AreEqual(typeof(MerkleWorkflow).Name, wf.Workflows.Peek().Name);
+            Assert.AreEqual(1, wf.Context.Workflows.Count);
+            Assert.AreEqual(typeof(MerkleWorkflow).Name, wf.Context.Workflows.Peek().Name);
         }
 
         [Test]
         public void TestMerkleWorkflow()
         {
-            var partition = Batch.GetCurrentPartition();
-            JObject batchItem = null;
-            using (var db = TrustStampDatabase.Open())
-            {
-                batchItem = db.BatchTable.AddDefault(partition);
-            }
+            JObject batchItem = DBBatchTable.NewItem(Batch.GetCurrentPartition());
 
-            var wf = WorkflowEngine.CreateAndSetState(typeof(MerkleWorkflow).Name, batchItem, new Stack<WorkflowBatch>());
+            var wf = new MerkleWorkflow();
+            wf.Context = new WorkflowContext();
+            wf.CurrentBatch = batchItem;
+
+            Assert.IsTrue(wf.Initialize());
+
+            //var partition = Batch.GetCurrentPartition();
+            //JObject batchItem = null;
+            //using (var db = TrustStampDatabase.Open())
+            //{
+            //    batchItem = db.BatchTable.AddDefault(partition);
+            //}
+
+            //var wf = WorkflowContext.CreateAndSetState(typeof(MerkleWorkflow).Name, batchItem, new Stack<WorkflowBatch>());
             wf.Execute();
 
             Console.WriteLine("Log: " + wf.CurrentBatch["log"]);
 
-            Assert.AreEqual(1, wf.Workflows.Count);
+            Assert.AreEqual(1, wf.Context.Workflows.Count);
         }
 
         [Test]
         public void TestWorkflowEngine()
         {
-            var partition = Batch.GetCurrentPartition();
             JArray batchs = null;
             using (var db = TrustStampDatabase.Open())
             {
@@ -77,7 +80,7 @@ namespace TrustStampTests.Core.Services
                 batchs = db.BatchTable.GetActive();
             }
 
-            var engine = new WorkflowEngine(batchs);
+            var engine = new WorkflowContext(batchs);
             engine.Execute();
 
             JObject batch = null;
@@ -88,7 +91,7 @@ namespace TrustStampTests.Core.Services
 
             Assert.AreEqual(20, ((byte[])batch["root"]).Length);
 
-            Console.WriteLine(batchs[0].CustomRender());
+            Console.WriteLine(batchs[0].ToString()); //.CustomRender());
             
             Assert.AreEqual(1, batchs.Count);
         }

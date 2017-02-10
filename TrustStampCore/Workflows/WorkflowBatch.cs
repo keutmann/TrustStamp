@@ -14,7 +14,7 @@ namespace TrustStampCore.Workflows
     public abstract class WorkflowBatch : IDisposable
     {
         public JObject CurrentBatch { get; set; }
-        public Stack<WorkflowBatch> Workflows { get; set; }
+        public WorkflowContext Context { get; set; }
 
         TrustStampDatabase _dataBase = null;
         public TrustStampDatabase DataBase {
@@ -67,21 +67,20 @@ namespace TrustStampCore.Workflows
 
         public virtual void Push(string name)
         {
-            Push((WorkflowBatch)Activator.CreateInstance(WorkflowEngine.WorkflowTypes[name]));
+            var wf = (WorkflowBatch)Activator.CreateInstance(WorkflowContext.WorkflowTypes[name]);
+            Push(wf);
         }
 
         public virtual void Push(JObject batch)
         {
-            var wf = WorkflowEngine.CreateInstance(batch, Workflows);
+
+            var wf = Context.CreateInstance(batch);
             Push(wf);
         }
 
-
         public virtual void Push(WorkflowBatch wf)
         {
-            wf.CurrentBatch = CurrentBatch;
-            wf.Workflows = Workflows;
-            Workflows.Push(wf);
+            Context.Push(wf, CurrentBatch);
         }
 
         public virtual void Update()

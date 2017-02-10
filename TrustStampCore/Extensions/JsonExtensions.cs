@@ -54,12 +54,13 @@ namespace TrustStampCore.Extensions
         {
             var serializer = new JsonSerializer();
 
-            var sb = new StringBuilder();
-            var sw = new StringWriter(sb);
+            //var sb = new StringBuilder();
+            var sw = new StringWriter();
+            var jtw = new JsonTextWriter(sw);
 
             serializer.Converters.Add(new BytesToHexConverter());
-            serializer.Serialize(sw, token);
-            return sb.ToString();
+            serializer.Serialize(jtw, token);
+            return sw.ToString();
         }
 
         public static string ToStringValue(this JToken token, string defaultValue = "")

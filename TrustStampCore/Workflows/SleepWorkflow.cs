@@ -47,7 +47,7 @@ namespace TrustStampCore.Workflows
             if (DateTimeOfInstance < timeOutDate)
                 return; // Not ready yet!
 
-             var wf = WorkflowEngine.CreateInstance((string)NextWorkflow.Value, CurrentBatch, Workflows);
+             var wf = Context.CreateInstance((string)NextWorkflow.Value, CurrentBatch);
             Push(wf);
 
             Update();

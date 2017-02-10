@@ -6,13 +6,13 @@ using TrustStampCore.Extensions;
 
 namespace TrustStampCore.Workflows
 {
-    public class WorkflowEngine
+    public class WorkflowContext
     {
         public static Dictionary<string, Type> WorkflowTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
 
         public Stack<WorkflowBatch> Workflows = new Stack<WorkflowBatch>();
 
-        static WorkflowEngine()
+        static WorkflowContext()
         {
             AddWorkflowType(typeof(BitcoinWorkflow));
             AddWorkflowType(typeof(FailedWorkflow));
@@ -30,16 +30,19 @@ namespace TrustStampCore.Workflows
                 WorkflowTypes.Add(wfType.Name, wfType);
         }
 
-
-        public WorkflowEngine(JArray batchs)
+        public WorkflowContext(JArray batchs) : this()
         {
             foreach (JObject batch in batchs)
             {
-                var wf = CreateInstance(batch, Workflows);
-
-                Workflows.Push(wf);
+                Push(batch);
             }
         }
+
+        public WorkflowContext()
+        {
+        }
+
+
 
         public void Execute()
         {
@@ -60,15 +63,29 @@ namespace TrustStampCore.Workflows
             }
         }
 
-        public static WorkflowBatch CreateInstance(JObject batch, Stack<WorkflowBatch> workflows)
+        public void Push(JObject batch)
+        {
+            var wf = CreateInstance(batch);
+            Push(wf, batch);
+        }
+
+
+        public void Push(WorkflowBatch wf, JObject currentBatch)
+        {
+            wf.CurrentBatch = currentBatch;
+            wf.Context = this;
+            Workflows.Push(wf);
+        }
+
+        public WorkflowBatch CreateInstance(JObject batch)
         {
             // Set to New state if empty!
             var name = batch["state"].EnsureProperty("name", typeof(NewWorkflow).Name);
 
-            return CreateInstance((string)name.Value, batch, workflows);
+            return CreateInstance((string)name.Value, batch);
         }
 
-        public static WorkflowBatch CreateInstance(string name, JObject batch, Stack<WorkflowBatch> workflows)
+        public WorkflowBatch CreateInstance(string name, JObject batch)
         {
             if (!WorkflowTypes.ContainsKey(name))
                 return null; // Handle this as an error!!!
@@ -77,13 +94,13 @@ namespace TrustStampCore.Workflows
 
             var wf = (WorkflowBatch)Activator.CreateInstance(workflowType);
             wf.CurrentBatch = batch;
-            wf.Workflows = workflows;
+            wf.Context = this;
             return wf;
         }
 
-        public static WorkflowBatch CreateAndSetState(string name, JObject batch, Stack<WorkflowBatch> workflows)
+        public WorkflowBatch CreateAndSetState(string name, JObject batch)
         {
-            var wf = CreateInstance(name, batch, workflows);
+            var wf = CreateInstance(name, batch);
             return wf;
         }
     }
